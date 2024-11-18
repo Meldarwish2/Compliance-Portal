@@ -1,5 +1,4 @@
 @extends('layouts.master')
-
 @section('content')
 <div class="container">
     <h2>Edit User</h2>
@@ -18,7 +17,15 @@
             <label for="password">Password (Leave empty to keep unchanged)</label>
             <input type="password" class="form-control" id="password" name="password">
         </div>
-        <button type="submit" class="btn btn-primary">Update User</button>
+        <div class="form-group mt-3">
+            <label for="roles">Roles</label>
+            <select name="roles[]" id="roles" class="form-control">
+                @foreach ($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Edit User</button>
     </form>
 </div>
 @endsection

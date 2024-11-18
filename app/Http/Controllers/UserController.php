@@ -109,72 +109,84 @@ class UserController extends Controller
           $users = User::all();
           return view('users.index', compact('users'));
       }
-  
+
       // Show user profile (admin or the user themselves)
       public function show(User $user)
       {
           return view('users.show', compact('user'));
       }
-  
+
       // Assign role to a user
       public function assignRole(Request $request, User $user)
       {
           $request->validate([
               'role' => 'required|in:admin,auditor,client',
           ]);
-  
+
           $user->assignRole($request->role);
           return back()->with('success', 'Role assigned successfully.');
       }
-  
+
       // Revoke role from a user
       public function revokeRole(User $user, $role)
       {
           $user->removeRole($role);
           return back()->with('success', 'Role revoked successfully.');
       }
-  
+
       // Show form to create new user (admin only)
       public function create()
-      {
-          return view('users.create');
+      { $roles = Role::all();
+          return view('users.create', compact('roles'));
       }
-  
+
       // Store new user (admin only)
       public function store(Request $request)
       {
-          $request->validate([
+        $validated =   $request->validate([
               'name' => 'required|string|max:255',
               'email' => 'required|email|unique:users',
-              'password' => 'required|min:8|confirmed',
+              'password' => 'required|min:8',
           ]);
-  
+
           $user = User::create($request->only('name', 'email', 'password'));
-          $user->assignRole('client'); // Default role can be client
-  
+          $user->roles()->sync($request->roles);
+
+//          $user->assignRole('client'); // Default role can be client
+
           return redirect()->route('users.index')->with('success', 'User created successfully.');
       }
-  
+
       // Edit user details (admin only)
       public function edit(User $user)
       {
-          return view('users.edit', compact('user'));
+          $roles = Role::all();
+          return view('users.edit', compact(['user','roles']));
       }
-  
+
       // Update user details (admin only)
-      public function update(Request $request, User $user)
-      {
-          $request->validate([
-              'name' => 'required|string|max:255',
-              'email' => 'required|email|unique:users,email,' . $user->id,
-              'password' => 'nullable|min:8|confirmed',
-          ]);
-  
-          $user->update($request->only('name', 'email', 'password'));
-  
-          return redirect()->route('users.index')->with('success', 'User updated successfully.');
-      }
-  
+    public function update(Request $request, $id)
+     {
+         $request->validate([
+             'name' => 'required',
+             'email' => 'required|email|unique:users,email,' . $id,
+             'password' => 'nullable|min:8',
+         ]);
+
+         $user = User::findOrFail($id);
+         $user->name = $request->name;
+         $user->email = $request->email;
+
+         if ($request->password) {
+             $user->password = Hash::make($request->password);
+         }
+
+         $user->save();
+
+         return redirect()->route('users.index')->with('success', 'User updated successfully.');
+     }
+
+
       // Delete user (admin only)
       public function destroy(User $user)
       {
