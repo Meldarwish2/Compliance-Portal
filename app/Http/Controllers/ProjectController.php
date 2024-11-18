@@ -9,7 +9,7 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::all();
+        $projects = Project::with(['users', 'statements', 'evidences'])->get();
         return view('projects.index', compact('projects'));
     }
 
@@ -32,6 +32,8 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
+        $project->load('users', 'statements', 'evidences');
+
         $users = User::get();
         return view('projects.show', compact(['project','users']));
     }
