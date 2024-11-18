@@ -21,7 +21,7 @@ class UserController extends Controller
             $data = User::with('roles')->get(); 
             return DataTables::of($data)
             ->addColumn('roles', function ($row) {
-                return $row->roles->pluck('name')->implode(', '); // Join role names with commas
+                return $row->roles->pluck('name')->implode(', ');
             })
                 ->addColumn('action', function($row){
                     $btn = '<a href="'.route('users.edit', $row->id).'" class="edit btn btn-primary btn-sm">Edit</a>';
