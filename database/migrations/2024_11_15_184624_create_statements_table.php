@@ -16,6 +16,8 @@ return new class extends Migration
             $table->text('content');
             $table->string('status')->default('pending');
             $table->unsignedBigInteger('project_id');
+            $table->string('creator_role')->nullable();
+            $table->string('created_by')->nullable();
             $table->timestamps();
 
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');

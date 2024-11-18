@@ -14,7 +14,8 @@ class Evidence extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function uploadedBy()
+    // An evidence belongs to a user (uploaded by)
+    public function user()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }

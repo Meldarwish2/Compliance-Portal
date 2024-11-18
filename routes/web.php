@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\PermissionController;
@@ -9,23 +10,61 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+// Redirect root route to login page
 Route::get('/', function () {
-    return redirect('/login'); // Redirect root route to login page
+    return redirect('/login');
 });
 
 Auth::routes(); // Authentication routes
 
+// Protected routes (requires authentication)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard'); // Dashboard route
-    Route::get('users/data', [UserController::class, 'getUsers'])->name('users.data');
-    Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
-    Route::resource('permissions', PermissionController::class);
-    Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
-    Route::post('/evidences/{evidence}/approve', [EvidenceController::class, 'approve'])->name('evidences.approve');
-    Route::post('/evidences/{evidence}/reject', [EvidenceController::class, 'reject'])->name('evidences.reject');
-    Route::resource('projects', ProjectController::class);
-    Route::resource('evidences', EvidenceController::class);
-    Route::resource('statements', StatementController::class);
 
+    // Dashboard (Admin full access, limited access for others)
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+    // Admin-only routes for managing users, roles, and permissions
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('users/data', [UserController::class, 'getUsers'])->name('users.data');
+        Route::resource('users', UserController::class);
+        Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
+
+        // Admin-specific project management
+        Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
+    });
+
+    // Project routes
+    Route::resource('projects', ProjectController::class)->except(['destroy']);
+    Route::middleware(['role:admin'])->group(function () {
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy'); // Only admin can delete projects
+    });
+
+    // Evidence routes
+    Route::middleware(['role:client'])->group(function () {
+        Route::post('/projects/{project}/evidences/upload', [EvidenceController::class, 'upload'])->name('evidences.upload');
+    });
+
+    Route::middleware(['role:admin|auditor'])->group(function () {
+        Route::get('/evidences/{evidence}/download', [EvidenceController::class, 'download'])->name('evidences.download');
+        Route::post('/evidences/{evidence}/approve', [EvidenceController::class, 'approve'])->name('evidences.approve');
+        Route::post('/evidences/{evidence}/reject', [EvidenceController::class, 'reject'])->name('evidences.reject');
+    });
+
+    // Statement routes
+    Route::post('/projects/{project}/statements', [StatementController::class, 'store'])
+        ->name('statements.store')
+        ->middleware('role:client|auditor');
+
+    Route::get('/projects/{project}/statements', [StatementController::class, 'show'])
+        ->name('statements.show')
+        ->middleware('role:admin|auditor|client');
+
+    Route::middleware(['role:admin|auditor'])->group(function () {
+        Route::delete('/statements/{statement}', [StatementController::class, 'destroy'])->name('statements.destroy'); // Admin and auditors can delete statements
+    });
+
+    Route::middleware(['role:client|auditor'])->group(function () {
+        Route::resource('statements', StatementController::class)->only(['create', 'store']);
+    });
 });
