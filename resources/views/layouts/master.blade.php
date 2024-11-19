@@ -7,10 +7,10 @@
   <title>{{ config('app.name', 'Laravel') }}</title>
 
   <!-- Favicon -->
-  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+  <link rel="shortcut icon" type="image/png" href="{{asset('assets/images/logos/favicon.png')}}" />
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="{{asset('assets/css/styles.min.css')}}" />
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
 </head>
@@ -25,7 +25,7 @@
       <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
           <a href="./index.html" class="text-nowrap logo-img">
-            <img src="../Origin Logo-01.png" width="180" alt="" />
+            <img src="{{asset('Origin Logo-01.png')}}" width="180" alt="" />
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
@@ -116,7 +116,7 @@
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
-                  <img src="../assets/images/profile/avatar.png" alt="" width="35" height="35" class="rounded-circle">
+                  <img src="{{asset('assets/images/profile/avatar.png')}}" alt="" width="35" height="35" class="rounded-circle">
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                   <div class="message-body">
@@ -166,11 +166,11 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+  <script src="{{asset('assets/libs/jquery/dist/jquery.min.js')}}"></script>
+  <script src="{{asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
+  <script src="{{asset('assets/js/sidebarmenu.js')}}"></script>
+  <script src="{{asset('assets/js/app.min.js')}}"></script>
+  <script src="{{asset('assets/libs/simplebar/dist/simplebar.js')}}"></script>
 
   <!-- DataTables JS -->
   <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
