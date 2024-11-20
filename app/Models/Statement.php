@@ -15,4 +15,8 @@ class Statement extends Model
     {
         return $this->hasMany(Evidence::class);
     }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatementController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Admin-specific project management
         Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
+        Route::post('/projects/{project}/revoke-access/{user}', [ProjectController::class, 'revokeAccess'])->name('projects.revokeAccess');
     });
 
     // Project routes
@@ -52,19 +54,24 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Statement routes
-    Route::post('/projects/{project}/statements', [StatementController::class, 'store'])
-        ->name('statements.store')
-        ->middleware('role:client|auditor');
+    Route::middleware(['role:client|auditor'])->group(function () {
+        Route::post('/projects/{project}/statements', [StatementController::class, 'store'])->name('statements.store');
+    });
 
-    Route::get('/projects/{project}/statements', [StatementController::class, 'show'])
-        ->name('statements.show')
-        ->middleware('role:admin|auditor|client');
+    Route::middleware(['role:admin|auditor|client'])->group(function () {
+        Route::get('/projects/{project}/statements', [StatementController::class, 'show'])->name('statements.show');
+    });
 
     Route::middleware(['role:admin|auditor'])->group(function () {
         Route::delete('/statements/{statement}', [StatementController::class, 'destroy'])->name('statements.destroy'); // Admin and auditors can delete statements
     });
 
+    // Comment routes
     Route::middleware(['role:client|auditor'])->group(function () {
-        Route::resource('statements', StatementController::class)->only(['create', 'store']);
+        Route::post('/statements/{statement}/comments', [CommentController::class, 'store'])->name('comments.store');
+    });
+
+    Route::middleware(['role:admin|auditor'])->group(function () {
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy'); // Admin and auditors can delete comments
     });
 });

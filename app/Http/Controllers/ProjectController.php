@@ -76,14 +76,14 @@ class ProjectController extends Controller
     // Show all projects assigned to the authenticated client
     public function index()
     {
-        
+        $users = User::all();
         if (Auth::user()->hasRole('admin')) {
             $projects = Project::with(['users', 'statements', 'evidences'])->get();
         }
         else {
             $projects = Auth::user()->projects; // Only show assigned projects for the client role
         }
-        return view('projects.index', compact('projects'));
+        return view('projects.index', compact(['projects','users']));
     }
 
     // Show project details along with users, statements, and evidences

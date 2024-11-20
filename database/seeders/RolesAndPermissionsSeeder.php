@@ -6,6 +6,8 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -14,22 +16,7 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-//        // Create roles
-//        $admin = Role::create(['name' => 'admin']);
-//        $auditor = Role::create(['name' => 'auditor']);
-//        $client = Role::create(['name' => 'client']);
-//
-//        // Create permissions
-//        Permission::create(['name' => 'assign projects']);
-//        Permission::create(['name' => 'upload evidence']);
-//        Permission::create(['name' => 'upload statements']);
-//        Permission::create(['name' => 'approve evidence']);
-//        Permission::create(['name' => 'reject evidence']);
-//
-//        // Assign permissions to roles
-//        $admin->givePermissionTo(['assign projects']);
-//        $auditor->givePermissionTo(['upload statements', 'approve evidence', 'reject evidence']);
-//        $client->givePermissionTo(['upload evidence']);
+        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Define permissions
@@ -84,6 +71,38 @@ class RolesAndPermissionsSeeder extends Seeder
             foreach ($rolePermissions as $permission) {
                 $role->givePermissionTo($permission);
             }
+        }
+
+        // Create users and assign roles
+        $users = [
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Auditor User',
+                'email' => 'auditor@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'auditor',
+            ],
+            [
+                'name' => 'Client User',
+                'email' => 'client@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'client',
+            ],
+        ];
+
+        foreach ($users as $userData) {
+            $user = User::create([
+                'name' => $userData['name'],
+                'email' => $userData['email'],
+                'password' => $userData['password'],
+            ]);
+
+            $user->assignRole($userData['role']);
         }
     }
 }

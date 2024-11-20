@@ -7,18 +7,19 @@ class Project extends Model
 {
     protected $fillable = ['name', 'description', 'status'];
 
-    public function evidences()
+    public function users()
     {
-        return $this->hasMany(Evidence::class);
+        return $this->belongsToMany(User::class);
     }
 
     public function statements()
     {
         return $this->hasMany(Statement::class);
     }
-    public function users()
-{
-    return $this->belongsToMany(User::class);  // Assuming a many-to-many relationship
-}
+
+    public function evidences()
+    {
+        return $this->hasMany(Evidence::class);
+    }
 
 }
