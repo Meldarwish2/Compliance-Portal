@@ -11,13 +11,17 @@ class CommentController extends Controller
     public function store(Request $request, Statement $statement)
     {
         $request->validate(['content' => 'required']);
-        Comment::create([
+      $comment =  Comment::create([
             'statement_id' => $statement->id,
             'content' => $request->content,
             'user_id' => auth()->id(),
             'role' => auth()->user()->getRoleNames()->first(),
         ]);
-        return back()->with('success', 'Comment added successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment added successfully',
+            'comment' => $comment,
+        ]);
     }
 
     public function destroy(Comment $comment)

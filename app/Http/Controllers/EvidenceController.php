@@ -28,13 +28,16 @@ class EvidenceController extends Controller
     public function approve(Evidence $evidence)
     {
         $evidence->update(['status' => 'approved']);
-
+        
+        // approve statement also 
+        $evidence->statement->update(['status' => 'approved']);
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence approved.');
     }
 
     public function reject(Evidence $evidence)
     {
         $evidence->update(['status' => 'rejected']);
+        $evidence->statement->update(['status' => 'rejected']);
 
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence rejected.');
     }

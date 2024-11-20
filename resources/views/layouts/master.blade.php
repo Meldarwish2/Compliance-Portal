@@ -46,7 +46,7 @@
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
-
+            @role('admin')
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Permissions</span>
@@ -67,6 +67,8 @@
                 <span class="hide-menu">Permissions</span>
               </a>
             </li>
+            @endrole
+            @role('admin')
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">User Management</span>
@@ -79,6 +81,7 @@
                 <span class="hide-menu">Users</span>
               </a>
             </li>
+            @endrole
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Project Management</span>
