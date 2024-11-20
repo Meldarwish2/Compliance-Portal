@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
     // Evidence routes
     Route::middleware(['role:client'])->group(function () {
         Route::post('/projects/{project}/evidences/upload', [EvidenceController::class, 'upload'])->name('evidences.upload');
+        Route::post('/statements/{statement}/evidences/upload', [StatementController::class, 'uploadEvidence'])->name('statements.evidences.upload');
     });
 
     Route::middleware(['role:admin|auditor'])->group(function () {

@@ -19,7 +19,7 @@
             <tbody>
             @foreach($project->statements as $statement)
                 <tr>
-                    <td>{{ $statement->id }}</td>
+                    <td>{{ $statement->content }}</td>
                     <td>
                         <span style="color: {{ $statement->status == 'approved' ? '#28a745' : ($statement->status == 'Pending' ? '#dc3545' : '#ffc107') }}">
                             {{ ucfirst($statement->status) }}
@@ -54,10 +54,18 @@
                         </form>
                         @endrole
 
-                        {{-- Auditor Role: Download Evidence --}}
+                        {{-- Auditor Role: Download Evidence, Approve, Reject --}}
                         @role('auditor')
                         @foreach($statement->evidences as $evidence)
                             <a href="{{ route('evidences.download', $evidence->id) }}" class="btn btn-info btn-sm mb-1">Download Evidence</a><br>
+                            <form action="{{ route('evidences.approve', $evidence->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
                         @endforeach
                         @endrole
 
@@ -68,29 +76,10 @@
             @endforeach
             </tbody>
         </table>
-
-        {{-- Client Role: Create New Statement --}}
-        @role('client')
-        <h2>Create New Statement</h2>
-        <form id="create-statement-form" class="mt-3" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="project_id" value="{{ $project->id }}">
-            <div class="form-group">
-                <label for="content">Statement Content</label>
-                <textarea name="content" class="form-control" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="evidence">Upload Evidence</label>
-                <input type="file" name="evidence" class="form-control">
-            </div>
-            <button type="button" class="btn btn-primary btn-sm submit-statement">Create Statement</button>
-            <div id="statement-message" class="mt-2"></div>
-        </form>
-        @endrole
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+   
     <script>
         $(document).ready(function() {
             $('#statements-table').DataTable();
@@ -162,38 +151,6 @@
                             });
                     }
                 });
-            });
-
-            document.querySelector('.submit-statement').addEventListener('click', function () {
-                const form = document.querySelector('#create-statement-form');
-                const messageDiv = document.querySelector('#statement-message');
-
-                // Prepare form data
-                const formData = new FormData(form);
-
-                // AJAX request for creating a new statement
-                fetch(`{{ url('/projects') }}/{{ $project->id }}/statements`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                    },
-                    body: formData,
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-                            form.reset();
-                            location.reload(); // Reload the page to show the new statement
-                        } else {
-                            messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        messageDiv.innerHTML = `<div class="alert alert-danger">An error occurred. Please try again.</div>`;
-                    });
             });
         });
     </script>

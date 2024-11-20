@@ -81,6 +81,29 @@ class StatementController extends Controller
         //  return redirect()->route('projects.index')->with('success', 'Statement added successfully.');
      }
 
+     public function uploadEvidence(Request $request, Statement $statement)
+     {
+         $request->validate([
+             'evidence' => 'required|file|mimes:pdf,docx,xlsx,jpg,png,eml',
+         ]);
+ 
+         $path = $request->file('evidence')->store('evidences', 'public');
+         $file = $request->file('evidence');
+         $evidence = new Evidence([
+             'statement_id' => $statement->id,
+             'file_name' => $file->getClientOriginalName(),
+             'file_path' => $path,
+             'project_id' => $statement->project_id,
+             'uploaded_by' => auth()->user()->id,
+         ]);
+ 
+         $evidence->save();
+ 
+         return response()->json([
+             'success' => true,
+             'message' => 'Evidence uploaded successfully.',
+         ]);
+     }
 
 
      // Show all statements for a project

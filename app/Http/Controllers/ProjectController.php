@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Imports\StatementsImport;
 use App\Models\Project;
+use App\Models\Statement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
@@ -122,13 +125,18 @@ class ProjectController extends Controller
     // Store new project
     public function store(Request $request)
     {
-        $request->validate([
+     $validated =  $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
         ]);
 
         $project = Project::create($request->only('name', 'description'));
+        if ($request->hasFile('csv_file')) {
+           
+            Excel::import(new StatementsImport($project->id), $request->file('csv_file'));
 
+        }
         return redirect()->route('projects.index')->with('success', 'Project created successfully.');
     }
 
