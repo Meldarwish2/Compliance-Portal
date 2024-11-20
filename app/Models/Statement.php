@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Statement extends Model
+class Statement extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     protected $fillable = ['content', 'status', 'project_id','creator_role','created_by'];
 
     public function project()

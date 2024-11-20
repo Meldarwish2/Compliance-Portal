@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuditController;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProjectController;
@@ -35,6 +36,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
         Route::post('/projects/{project}/revoke-access', [ProjectController::class, 'revokeAccess'])->name('projects.revokeAccess');
         Route::get('/projects/{project}/assign-users', [ProjectController::class, 'assignUsers'])->name('projects.assignUsers');
+
+        // Admin Audits
+        Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
     });
 
     // Project routes
