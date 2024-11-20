@@ -33,7 +33,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Admin-specific project management
         Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
-        Route::post('/projects/{project}/revoke-access/{user}', [ProjectController::class, 'revokeAccess'])->name('projects.revokeAccess');
+        Route::post('/projects/{project}/revoke-access', [ProjectController::class, 'revokeAccess'])->name('projects.revokeAccess');
+        Route::get('/projects/{project}/assign-users', [ProjectController::class, 'assignUsers'])->name('projects.assignUsers');
     });
 
     // Project routes

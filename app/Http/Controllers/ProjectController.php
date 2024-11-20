@@ -90,6 +90,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $users = User::all();  // To assign project to a user, admin will need to select from all users
+        $project->load('statements.comments', 'statements.evidences');
         return view('projects.show', compact('project', 'users'));
     }
 
@@ -111,6 +112,11 @@ class ProjectController extends Controller
     {
         $project->users()->detach($user);
         return back()->with('success', 'Access revoked.');
+    }
+    public function assignUsers(Project $project)
+    {
+        $users = User::all();
+        return view('projects.assign', compact('project', 'users'));
     }
 
     // Store new project

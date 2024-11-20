@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Evidence;
 use App\Models\Project;
+use App\Models\Statement;
 use Illuminate\Http\Request;
 
 class EvidenceController extends Controller
@@ -38,24 +39,24 @@ class EvidenceController extends Controller
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence rejected.');
     }
     // Upload evidence for a specific project
-    public function upload(Request $request, Project $project)
+    public function upload(Request $request, Statement $statement)
     {
         $request->validate([
             'evidence' => 'required|file|mimes:pdf,docx,xlsx,jpeg,png,jpg,eml|max:10240',
         ]);
         $file = $request->file('evidence');
         $filePath = $file->storeAs('evidences', $file->getClientOriginalName(), 'public');
-    
+
         // Create Evidence record
         $evidence = new Evidence();
-        $evidence->project_id = $project->id;
+        $evidence->statement_id = $statement->id;
         $evidence->file_name = $file->getClientOriginalName();
         $evidence->uploaded_by = auth()->user()->id;
         $evidence->file_path = $filePath;
         $evidence->save();
-    
+
         return response()->json(['success' => true, 'message' => 'Evidence uploaded successfully.']);
-    
+
     }
 
     // Allow auditors to download evidence (without viewing)

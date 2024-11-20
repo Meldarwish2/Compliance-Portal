@@ -17,10 +17,12 @@ return new class extends Migration
             $table->string('file_path');
             $table->string('status')->default('pending');
             $table->unsignedBigInteger('project_id');
+            $table->unsignedBigInteger('statement_id');
             $table->unsignedBigInteger('uploaded_by');
             $table->timestamps();
-
+            
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('statement_id')->references('id')->on('statements')->onDelete('cascade');
             $table->foreign('uploaded_by')->references('id')->on('users')->onDelete('cascade');
         });
     }

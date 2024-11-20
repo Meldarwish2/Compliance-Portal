@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Evidence extends Model
 {
     protected $table='evidences';
-    protected $fillable = ['file_name', 'file_path', 'status', 'project_id', 'uploaded_by'];
+    protected $fillable = ['file_name', 'file_path', 'status', 'project_id','statement_id', 'uploaded_by'];
 
     public function project()
     {
@@ -18,5 +18,9 @@ class Evidence extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+    public function statement()
+    {
+        return $this->belongsTo(Statement::class);
     }
 }
