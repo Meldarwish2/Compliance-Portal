@@ -7,7 +7,10 @@ use App\Models\Statement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use ZipArchive;
 
 class ProjectController extends Controller
 {
@@ -166,9 +169,54 @@ class ProjectController extends Controller
     }
 
     // Delete a project
-    public function destroy(Project $project)
+    public function destroy(Request $request, Project $project)
     {
+        $deleteOption = $request->input('delete_option');
+        $zipPassword = $request->input('zip_password');
+
+        if ($deleteOption === 'delete') {
+            // Delete all related files
+            $project->statements->each(function ($statement) {
+                $statement->evidences->each(function ($evidence) {
+                    Storage::delete($evidence->file_path);
+                });
+            });
+        } elseif ($deleteOption === 'archive') {
+            // Create a password-protected ZIP archive
+            $zip = new ZipArchive();
+            $zipFileName = 'archive_' . $project->id .'_'.$project->name . '.zip';
+            $zipFilePath = storage_path('app/public/' . $zipFileName);
+
+            if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                $project->statements->each(function ($statement) use ($zip) {
+                    $statement->evidences->each(function ($evidence) use ($zip) {
+                        $filePath = storage_path('app/public/' . $evidence->file_path);
+                        $zip->addFile($filePath, basename($evidence->file_path));
+                    });
+                });
+
+                // Set a password for the ZIP file
+                $zip->setPassword($zipPassword);
+
+                // Encrypt the files in the ZIP archive
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $zip->setEncryptionIndex($i, ZipArchive::EM_AES_256);
+                }
+
+                $zip->close();
+
+                // Delete the original files
+                $project->statements->each(function ($statement) {
+                    $statement->evidences->each(function ($evidence) {
+                        Storage::delete($evidence->file_path);
+                    });
+                });
+            }
+        }
+
+        // Delete the project
         $project->delete();
+
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 }
