@@ -9,6 +9,16 @@ class Project extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     protected $fillable = ['name', 'description', 'status'];
 
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_PENDING = 'pending';
+    const STATUS = [
+        self::STATUS_APPROVED => 'Approved',
+        self::STATUS_REJECTED => 'Rejected',
+        self::STATUS_PENDING  => 'Pending',
+    ];
+
+
     public function users()
     {
         return $this->belongsToMany(User::class);

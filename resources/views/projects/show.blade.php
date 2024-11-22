@@ -21,7 +21,7 @@
             <tr>
                 <td>{{ $statement->content }}</td>
                 <td>
-                    <span style="color: {{ $statement->status == 'approved' ? '#28a745' : ($statement->status == 'pending' ? '#ffc107' : '#dc3545') }}">
+                    <span style="color: {{ $statement->status == \App\Models\Statement::STATUS_APPROVED ? '#28a745' : ($statement->status ==  \App\Models\Statement::STATUS_PENDING ? '#ffc107' : '#dc3545') }}">
                         {{ ucfirst($statement->status) }}
                     </span>
                 </td>

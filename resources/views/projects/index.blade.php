@@ -19,7 +19,7 @@
                 <tr>
                     <th>Project Name</th>
                     <th>Description</th>
-                    <th>Status</th>
+                    <!-- <th>Status</th> -->
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -28,11 +28,11 @@
                     <tr>
                         <td>{{ $project->name }}</td>
                         <td>{{ $project->description }}</td>
-                        <td>
+                        <!-- <td>
                             <span style="color: {{ $project->status == 'completed' ? '#28a745' : ($project->status == 'Pending' ? '#ffc107' : '#6c757d') }}">
                                 {{ ucfirst($project->status) }}
                             </span>
-                        </td>
+                        </td> -->
                         <td>
                             <a href="{{ route('projects.show', $project->id) }}" class="btn btn-primary btn-sm">View Details</a>
                             {{-- Admin-only: Edit Project Button --}}

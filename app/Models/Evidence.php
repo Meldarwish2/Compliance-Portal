@@ -12,6 +12,15 @@ class Evidence extends Model implements Auditable
     protected $table='evidences';
     protected $fillable = ['file_name', 'file_path', 'status', 'project_id','statement_id', 'uploaded_by'];
 
+    
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_PENDING = 'pending';
+    const STATUS = [
+        self::STATUS_APPROVED => 'Approved',
+        self::STATUS_REJECTED => 'Rejected',
+        self::STATUS_PENDING  => 'Pending',
+    ];
     public function project()
     {
         return $this->belongsTo(Project::class);

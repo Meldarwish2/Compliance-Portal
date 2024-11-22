@@ -2,28 +2,53 @@
 
 @section('content')
 <div class="container">
-    <h1>Admin Dashboard</h1>
-    <div id="chart-container">
-        <canvas id="projectCompletionChart"></canvas>
-    </div>
+   
+    @foreach($projects as $project)
+        <div class="project-chart-container">
+            <h2>{{ $project->name }}</h2>
+            <canvas id="projectCompletionChart-{{ $project->id }}"></canvas>
+        </div>
+    @endforeach
 </div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('projectCompletionChart').getContext('2d');
-    const chartData = @json($chartData);
+    document.addEventListener('DOMContentLoaded', function () {
+        const projects = @json($projects);
 
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: chartData.labels,
-            datasets: [{
-                data: chartData.values,
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            }],
-        },
+        projects.forEach(project => {
+            const ctx = document.getElementById('projectCompletionChart-' + project.id).getContext('2d');
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Pending', 'Rejected'],
+                    datasets: [{
+                        data: [project.completed_statements_count, project.pending_statements_count, project.rejected_statements_count],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    }],
+                },
+                options: {
+                    responsive: false, // Disable responsive resizing
+                    maintainAspectRatio: false, // Allow the chart to fill the canvas
+                }
+            });
+        });
     });
 </script>
 @endpush
 @endsection
+
+<style>
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .project-chart-container {
+        width: 300px;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
