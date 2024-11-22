@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureTwoFactorIsVerified;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
        $middleware->alias([
            'auth' => Authenticate::class,
            'role' => RoleMiddleware::class,
+           'twofactor' => EnsureTwoFactorIsVerified::class,
        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

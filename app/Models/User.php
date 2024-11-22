@@ -5,7 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Models\Role;
@@ -66,4 +69,18 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function sendTwoFactorCode()
+    {
+        // Generate a random 6-digit code
+        $code = random_int(100000, 999999);
+
+        // Save the code in the `two_factor_secret` column
+       
+        $this->two_factor_secret = bcrypt($code);
+        $this->save();
+        // Send the code to the user's email
+        Mail::to($this->email)->send(new \App\Mail\TwoFactorCodeMail($code));
+    }
+
 }

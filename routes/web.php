@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatementController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\TwoFactorController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +21,12 @@ Route::get('/', function () {
 Auth::routes(); // Authentication routes
 
 // Protected routes (requires authentication)
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','twofactor'])->group(function () {
+
+    Route::get('/two-factor', function () {
+        return view('auth.two_factor');
+    })->name('two.factor.form');
+    Route::post('/verify-2fa', [TwoFactorController::class, 'verify'])->name('verify.2fa');
 
     // Dashboard (Admin full access, limited access for others)
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');

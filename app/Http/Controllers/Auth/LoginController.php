@@ -37,4 +37,26 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
     }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $user
+     * @return \Illuminate\Http\Response
+     */
+    protected function authenticated($request, $user)
+    {
+        // Check if the user has a 2FA code set
+        if (!$user->two_factor_secret) {
+            // Generate and send the 2FA code
+            $user->sendTwoFactorCode();
+        }
+
+        // Redirect to the 2FA verification page
+        return redirect()->route('two.factor.form');
+
+        // // Default redirect after successful login
+        // return redirect()->intended($this->redirectTo);
+    }
 }
