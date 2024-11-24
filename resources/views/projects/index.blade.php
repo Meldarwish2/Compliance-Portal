@@ -37,7 +37,7 @@
                             <a href="{{ route('projects.show', $project->id) }}" class="btn btn-primary btn-sm">View Details</a>
                             {{-- Admin-only: Edit Project Button --}}
                             @role('admin')
-                            <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                            <!-- <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-secondary btn-sm">Edit</a> -->
                             <a href="{{ route('projects.assignUsers', $project->id) }}" class="btn btn-info btn-sm">Assign/Revoke Users</a>
                             <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteProjectModal{{ $project->id }}">Delete</button>
                             @endrole

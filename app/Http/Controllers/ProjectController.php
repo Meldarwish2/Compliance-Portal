@@ -191,27 +191,34 @@ class ProjectController extends Controller
                 $project->statements->each(function ($statement) use ($zip) {
                     $statement->evidences->each(function ($evidence) use ($zip) {
                         $filePath = storage_path('app/public/' . $evidence->file_path);
-                        $zip->addFile($filePath, basename($evidence->file_path));
+                        if (file_exists($filePath)) {
+                            $zip->addFile($filePath, basename($evidence->file_path));
+                        }
                     });
                 });
-
-                // Set a password for the ZIP file
-                $zip->setPassword($zipPassword);
-
-                // Encrypt the files in the ZIP archive
-                for ($i = 0; $i < $zip->numFiles; $i++) {
-                    $zip->setEncryptionIndex($i, ZipArchive::EM_AES_256);
+            
+                // Set a password for the ZIP archive
+                if ($zipPassword) {
+                    $zip->setPassword($zipPassword);
+            
+                    // Encrypt each file in the ZIP archive
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $zip->setEncryptionIndex($i, ZipArchive::EM_AES_256, $zipPassword);
+                    }
                 }
-
+            
                 $zip->close();
-
-                // Delete the original files
+            
+                // Delete the original files after creating the ZIP archive
                 $project->statements->each(function ($statement) {
                     $statement->evidences->each(function ($evidence) {
                         Storage::delete($evidence->file_path);
                     });
                 });
+            } else {
+                return redirect()->back()->with('error', 'Failed to create ZIP archive.');
             }
+            
         }
 
         // Delete the project
