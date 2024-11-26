@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->string('status')->default('pending');
+            $table->string('type')->default('accept_reject'); // types['accept_reject','rating','compliance']
             $table->timestamps();
         });
     }

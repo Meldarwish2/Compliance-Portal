@@ -42,6 +42,7 @@ Route::middleware(['auth','twofactor'])->group(function () {
         Route::post('/projects/{project}/assign', [ProjectController::class, 'assign'])->name('projects.assign');
         Route::post('/projects/{project}/revoke-access', [ProjectController::class, 'revokeAccess'])->name('projects.revokeAccess');
         Route::get('/projects/{project}/assign-users', [ProjectController::class, 'assignUsers'])->name('projects.assignUsers');
+        Route::post('/projects/{project}/upload-statement-csv', [ProjectController::class, 'UploadStatementCsv'])->name('projects.uploadstatementcsv');
 
         // Admin Audits
         Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');

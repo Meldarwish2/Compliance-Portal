@@ -195,24 +195,31 @@ class UserController extends Controller
       }
 
       public function getUsers(Request $request)
-    {
-        if ($request->ajax()) {
-            $data = User::with('roles')->get();
-            return DataTables::of($data)
-                ->addColumn('roles', function ($row) {
-                    return $row->roles->pluck('name')->implode(', ');
-                })
-                ->addColumn('action', function ($row) {
-                    $btn = '<a href="' . route('users.edit', $row->id) . '" class="edit btn btn-primary btn-sm">Edit</a>';
-                    $btn .= ' <form action="' . route('users.destroy', $row->id) . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . '
-                    ' . method_field('DELETE') . '
-                    <button type="submit" class="delete btn btn-danger btn-sm">Delete</button>
-                  </form>';
-                    return $btn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-    }
+      {
+          if ($request->ajax()) {
+              $data = User::with('roles')->get();
+              $currentUserId = auth()->id(); 
+              return DataTables::of($data)
+                  ->addColumn('roles', function ($row) {
+                      return $row->roles->pluck('name')->implode(', ');
+                  })
+                  ->addColumn('action', function ($row) use ($currentUserId) {
+                      $btn = '';
+                      if ($row->id !== $currentUserId) {
+                          $btn .= '<a href="' . route('users.edit', $row->id) . '" class="edit btn btn-primary btn-sm">Edit</a>';
+                          $btn .= ' <form action="' . route('users.destroy', $row->id) . '" method="POST" style="display:inline;">
+                              ' . csrf_field() . '
+                              ' . method_field('DELETE') . '
+                              <button type="submit" class="delete btn btn-danger btn-sm">Delete</button>
+                          </form>';
+                      } else {
+                          $btn = '<span class="text-muted"></span>';
+                      }
+                      return $btn;
+                  })
+                  ->rawColumns(['action'])
+                  ->make(true);
+          }
+      }
+      
 }

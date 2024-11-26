@@ -7,7 +7,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Project extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $fillable = ['name', 'description', 'status'];
+    protected $fillable = ['name', 'description', 'status','type'];
 
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';

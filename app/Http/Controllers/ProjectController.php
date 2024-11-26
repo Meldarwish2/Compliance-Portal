@@ -226,4 +226,16 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
+
+    public function UploadStatementCsv(Request $request, Project $project)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
+        ]);
+
+        if ($request->hasFile('csv_file')) {
+            Excel::import(new StatementsImport($project->id), $request->file('csv_file'));
+        }
+        return redirect()->route('projects.show', $project)->with('success', 'Statements uploaded successfully.');
+    }
 }
