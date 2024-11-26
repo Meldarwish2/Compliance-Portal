@@ -69,8 +69,9 @@
                     </form>
                     @endrole
 
-                    {{-- Auditor Role: Download Evidence, Approve, Reject --}}
+                    {{-- Auditor Role: Actions based on project type --}}
                     @role('auditor')
+                    @if($project->type == 'accept_reject')
                     @foreach($statement->evidences as $evidence)
                     <a href="{{ route('evidences.download', $evidence->id) }}" class="btn btn-info btn-sm mb-1">Download Evidence</a><br>
                     <form action="{{ route('evidences.approve', $evidence->id) }}" method="POST" class="d-inline">
@@ -82,6 +83,44 @@
                         <button type="submit" class="btn btn-danger btn-sm">Reject</button>
                     </form>
                     @endforeach
+                    @elseif($project->type == 'rating')
+                    @foreach($statement->evidences as $evidence)
+                    <a href="{{ route('evidences.download', $evidence->id) }}" class="btn btn-info btn-sm mb-1">Download Evidence</a><br>
+                    <div class="rating" data-evidence-id="{{ $evidence->id }}">
+                        <input type="hidden" class="rating-value" value="{{ $evidence->rating ?? 0 }}">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span class="star" data-rating="{{ $i }}">
+                            <i class="fas fa-star"></i>
+                            </span>
+                            @endfor
+                    </div>
+                    <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                    @endforeach
+                    @elseif($project->type == 'compliance')
+                    @foreach($statement->evidences as $evidence)
+                    <a href="{{ route('evidences.download', $evidence->id) }}" class="btn btn-info btn-sm mb-1">Download Evidence</a><br>
+                    <div class="compliance-buttons">
+                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="compliance" value="compliant">
+                            <button type="submit" class="btn btn-success btn-sm">Compliant</button>
+                        </form>
+                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="compliance" value="partially_compliant">
+                            <button type="submit" class="btn btn-warning btn-sm">Partially Compliant</button>
+                        </form>
+                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="compliance" value="rejected">
+                            <button type="submit" class="btn btn-danger btn-sm">Rejected</button>
+                        </form>
+                    </div>
+                    @endforeach
+                    @endif
                     @endrole
 
                     {{-- Add Comment Button --}}
@@ -213,6 +252,126 @@
                 }
             });
         });
+
+        // Star Rating Functionality
+        $('.rating').each(function() {
+            const ratingContainer = $(this);
+            const stars = ratingContainer.find('.star');
+            const evidenceId = ratingContainer.data('evidence-id');
+            const ratingValue = ratingContainer.find('.rating-value').val();
+
+            // Initialize the stars based on the saved rating
+            stars.each(function() {
+                const star = $(this);
+                if (star.data('rating') <= ratingValue) {
+                    star.addClass('selected');
+                }
+            });
+
+            stars.on('mouseenter', function() {
+                const rating = $(this).data('rating');
+                stars.each(function() {
+                    const star = $(this);
+                    if (star.data('rating') <= rating) {
+                        star.addClass('hover');
+                    } else {
+                        star.removeClass('hover');
+                    }
+                });
+            });
+
+            stars.on('mouseleave', function() {
+                stars.removeClass('hover');
+            });
+
+            stars.on('click', function() {
+                const rating = $(this).data('rating');
+                stars.each(function() {
+                    const star = $(this);
+                    if (star.data('rating') <= rating) {
+                        star.addClass('selected');
+                    } else {
+                        star.removeClass('selected');
+                    }
+                });
+
+                // Update the hidden input field with the new rating
+                ratingContainer.find('.rating-value').val(rating);
+
+                // Submit the rating
+                fetch(`/evidences/${evidenceId}/rate`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            rating: rating
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Rating submitted successfully.');
+                        } else {
+                            alert('Failed to submit rating.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            });
+        });
     });
 </script>
 @endsection
+
+<style>
+    .container-fluid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .project-chart-container {
+        width: 300px;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .client-row {
+        font-weight: bold;
+    }
+
+    .project-row {
+        padding-left: 20px;
+    }
+
+    .full-screen-table {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+
+    .full-screen-table table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .rating .star {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #ccc;
+    }
+
+    .rating .star.hover,
+    .rating .star.selected {
+        color: #ffcc00;
+    }
+
+    .compliance-buttons .btn {
+        margin-right: 5px;
+    }
+</style>

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('file_name');
             $table->string('file_path');
             $table->string('status')->default('pending');
+            $table->string('rating')->nullable();
+            $table->string('compliance')->nullable();
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('statement_id');
             $table->unsignedBigInteger('uploaded_by');

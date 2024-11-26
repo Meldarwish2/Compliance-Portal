@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\StatementsImport;
+use App\Models\Evidence;
 use App\Models\Project;
 use App\Models\Statement;
 use App\Models\User;
@@ -237,5 +238,49 @@ class ProjectController extends Controller
             Excel::import(new StatementsImport($project->id), $request->file('csv_file'));
         }
         return redirect()->route('projects.show', $project)->with('success', 'Statements uploaded successfully.');
+    }
+
+    // New methods for rating and compliance
+    public function rateEvidence(Request $request, $evidenceId)
+    {
+        $request->validate([
+            'rating' => 'required|integer|between:1,5',
+        ]);
+
+        $evidence = Evidence::findOrFail($evidenceId);
+        $evidence->rating = $request->rating;
+
+        $evidence->status = Evidence::STATUS_APPROVED;
+        $evidence->statement->status = Statement::STATUS_APPROVED;
+        $evidence->save();
+        $evidence->statement->save();
+
+        return response()->json(['success' => true, 'message' => 'Evidence rated successfully.']);
+    }
+
+    public function complianceEvidence(Request $request, $evidenceId)
+    {
+        $request->validate([
+            'compliance' => 'required|in:compliant,partially_compliant,rejected',
+        ]);
+
+        $evidence = Evidence::findOrFail($evidenceId);
+        $evidence->compliance = $request->compliance;
+        if (in_array($request->compliance, ['partially_compliant', 'compliant'])) {
+        
+            $evidence->status = Evidence::STATUS_APPROVED;
+            $evidence->statement->status = Statement::STATUS_APPROVED;
+
+            
+        }
+        else
+        {
+            $evidence->status = Evidence::STATUS_REJECTED;
+            $evidence->statement->status = Statement::STATUS_REJECTED;
+        }
+        $evidence->save();
+        $evidence->statement->save();
+        return response()->json(['success' => true, 'message' => 'Compliance status updated successfully.']);
+        
     }
 }

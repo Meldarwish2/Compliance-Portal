@@ -30,6 +30,10 @@ Route::middleware(['auth','twofactor'])->group(function () {
 
     // Dashboard (Admin full access, limited access for others)
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    
+Route::get('/autocomplete/clients', [AdminController::class, 'autocompleteClients'])->name('autocomplete.clients');
+Route::get('/clients/projects', [AdminController::class, 'clientProjects'])->name('clientProjects');
+Route::get('/autocomplete/projects', [AdminController::class, 'autocompleteProjects'])->name('autocomplete.projects');
 
     // Admin-only routes for managing users, roles, and permissions
     Route::middleware(['role:admin'])->group(function () {
@@ -64,6 +68,8 @@ Route::middleware(['auth','twofactor'])->group(function () {
         Route::get('/evidences/{evidence}/download', [EvidenceController::class, 'download'])->name('evidences.download');
         Route::post('/evidences/{evidence}/approve', [EvidenceController::class, 'approve'])->name('evidences.approve');
         Route::post('/evidences/{evidence}/reject', [EvidenceController::class, 'reject'])->name('evidences.reject');
+        Route::post('/evidences/{evidence}/rate', [ProjectController::class, 'rateEvidence'])->name('evidences.rate');
+        Route::post('/evidences/{evidence}/compliance', [ProjectController::class, 'complianceEvidence'])->name('evidences.compliance');
     });
 
     // Statement routes
