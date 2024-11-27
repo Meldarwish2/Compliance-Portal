@@ -33,5 +33,9 @@ class Project extends Model implements Auditable
     {
         return $this->hasMany(Evidence::class);
     }
-
+    public function usersWithRoles()
+    {
+        return $this->belongsToMany(User::class)->withPivot('role'); // Ensure the 'role' field exists in the pivot table
+    }
+    
 }

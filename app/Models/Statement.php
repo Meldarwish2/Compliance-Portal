@@ -31,4 +31,5 @@ class Statement extends Model implements Auditable
         return $this->hasMany(Comment::class);
     }
     
+    
 }

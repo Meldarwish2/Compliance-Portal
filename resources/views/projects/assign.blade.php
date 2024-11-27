@@ -36,7 +36,7 @@
                             @csrf
                             <div class="form-group mb-3">
                                 <label for="revoke_user_id" class="form-label">Select User</label>
-                                <select name="user_id" id="revoke_user_id" class="form-select" required>
+                                <select name="user_id" id="revoke_user_id" id = user_id class="form-select" required>
                                     <option value="" disabled selected>Select a user</option>
                                     @foreach($project->users as $user)
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>

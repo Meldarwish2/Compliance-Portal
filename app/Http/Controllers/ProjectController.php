@@ -6,6 +6,8 @@ use App\Models\Evidence;
 use App\Models\Project;
 use App\Models\Statement;
 use App\Models\User;
+use App\Notifications\AuditorActionNotification;
+use App\Notifications\ProjectAssignmentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -110,17 +112,22 @@ class ProjectController extends Controller
 
         // Assign project to the selected user
         $project->users()->attach($request->user_id);
+        $user = User::find($request->user_id);
+        $user->notify(new ProjectAssignmentNotification($project, 'assigned'));
 
         return back()->with('success', 'Project assigned successfully.');
     }
 
     // Admin revokes access for a user
-    public function revokeAccess(Project $project, User $user)
+    public function revokeAccess(Project $project, Request $request)
     {
+
+        $user = User::find($request->user_id);
+        $user->notify(new ProjectAssignmentNotification($project, 'revoked'));
         $project->users()->detach($user);
         return back()->with('success', 'Access revoked.');
-    }
-    public function assignUsers(Project $project)
+    } 
+       public function assignUsers(Project $project)
     {
         $users = User::all();
         return view('projects.assign', compact('project', 'users'));
@@ -249,12 +256,12 @@ class ProjectController extends Controller
 
         $evidence = Evidence::findOrFail($evidenceId);
         $evidence->rating = $request->rating;
-
         $evidence->status = Evidence::STATUS_APPROVED;
         $evidence->statement->status = Statement::STATUS_APPROVED;
         $evidence->save();
         $evidence->statement->save();
-
+        $user = User::find($evidence->uploaded_by);
+        $user()->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));    
         return response()->json(['success' => true, 'message' => 'Evidence rated successfully.']);
     }
 
@@ -270,13 +277,15 @@ class ProjectController extends Controller
         
             $evidence->status = Evidence::STATUS_APPROVED;
             $evidence->statement->status = Statement::STATUS_APPROVED;
-
-            
+            $user = User::find($evidence->uploaded_by);
+            $user()->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));   
         }
         else
         {
             $evidence->status = Evidence::STATUS_REJECTED;
             $evidence->statement->status = Statement::STATUS_REJECTED;
+            $user = User::find($evidence->uploaded_by);
+            $user()->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));   
         }
         $evidence->save();
         $evidence->statement->save();

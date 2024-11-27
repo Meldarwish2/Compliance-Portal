@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Evidence;
 use App\Models\Project;
 use App\Models\Statement;
+use App\Models\User;
+use App\Notifications\AuditorActionNotification;
 use Illuminate\Http\Request;
 
 class EvidenceController extends Controller
@@ -32,6 +34,8 @@ class EvidenceController extends Controller
         $evidence->save();
         $evidence->statement->status = Statement::STATUS_APPROVED;
         $evidence->statement->save();
+        $user = User::find($evidence->uploaded_by);
+        $user->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));
 
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence approved.');
     }
@@ -42,6 +46,8 @@ class EvidenceController extends Controller
         $evidence->save();
         $evidence->statement->status = Statement::STATUS_REJECTED;
         $evidence->statement->save();
+        $user = User::find($evidence->uploaded_by);
+        $user()->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));
 
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence rejected.');
     }

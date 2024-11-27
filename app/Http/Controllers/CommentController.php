@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Statement;
+use App\Notifications\CommentAddedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,6 +31,20 @@ class CommentController extends Controller
             'user_id' => auth()->id(),
             'role' => auth()->user()->getRoleNames()->first(),
         ]);
+        // Notify users associated with the project
+        $project = $statement->project;
+
+        // Determine user roles from the project
+        $users = $project->users;
+        foreach ($users as $user) {
+            if ($comment->role === 'auditor' && $user->hasRole('client')) {
+                // Notify client if auditor adds a comment
+                $user->notify(new CommentAddedNotification($comment));
+            } elseif ($comment->role === 'client' && $user->hasRole('auditor')) {
+                // Notify auditor if client adds a comment
+                $user->notify(new CommentAddedNotification($comment));
+            }
+        }
         return response()->json([
             'success' => true,
             'message' => 'Comment added successfully',
