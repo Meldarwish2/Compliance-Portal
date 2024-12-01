@@ -25,13 +25,13 @@ class PreDefinedProjects extends Seeder
         ]);
         $samaProject->users()->attach($admin);
 
-        // Create the CSF project and assign it to the admin
-        $csfProject = Project::create([
-            'name' => 'CSF',
-            'description' => 'Pre-defined project for CSF',
+        // Create the NCA project and assign it to the admin
+        $NcaProject = Project::create([
+            'name' => 'NCA',
+            'description' => 'Pre-defined project for NCA',
             'status' => 'pending', 
             'type' => 'compliance', 
         ]);
-        $csfProject->users()->attach($admin);
+        $NcaProject->users()->attach($admin);
     }
 }

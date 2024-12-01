@@ -261,8 +261,9 @@ class ProjectController extends Controller
         $evidence->save();
         $evidence->statement->save();
         $user = User::find($evidence->uploaded_by);
-        $user()->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));    
+        $user->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));    
         return response()->json(['success' => true, 'message' => 'Evidence rated successfully.']);
+    
     }
 
     public function complianceEvidence(Request $request, $evidenceId)
@@ -278,18 +279,19 @@ class ProjectController extends Controller
             $evidence->status = Evidence::STATUS_APPROVED;
             $evidence->statement->status = Statement::STATUS_APPROVED;
             $user = User::find($evidence->uploaded_by);
-            $user()->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));   
+            $user->notify(new AuditorActionNotification( Evidence::STATUS_APPROVED,  $evidence->statement));   
         }
         else
         {
             $evidence->status = Evidence::STATUS_REJECTED;
             $evidence->statement->status = Statement::STATUS_REJECTED;
             $user = User::find($evidence->uploaded_by);
-            $user()->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));   
+            $user->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));   
         }
         $evidence->save();
         $evidence->statement->save();
-        return response()->json(['success' => true, 'message' => 'Compliance status updated successfully.']);
+        // return response()->json(['success' => true, 'message' => 'Compliance status updated successfully.']);
+        return redirect()->back()->with('success', 'Compliance status updated successfully.');
         
     }
 }

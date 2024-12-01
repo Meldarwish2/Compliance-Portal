@@ -47,7 +47,7 @@ class EvidenceController extends Controller
         $evidence->statement->status = Statement::STATUS_REJECTED;
         $evidence->statement->save();
         $user = User::find($evidence->uploaded_by);
-        $user()->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));
+        $user->notify(new AuditorActionNotification( Evidence::STATUS_REJECTED,  $evidence->statement));
 
         return redirect()->route('projects.show', $evidence->project_id)->with('success', 'Evidence rejected.');
     }
