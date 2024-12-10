@@ -17,6 +17,8 @@ return new class extends Migration
             $table->text('description');
             $table->string('status')->default('pending');
             $table->string('type')->default('accept_reject'); // types['accept_reject','rating','compliance']
+            $table->unsignedBigInteger('parent_project_id')->nullable();
+            $table->foreign('parent_project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->timestamps();
         });
     }

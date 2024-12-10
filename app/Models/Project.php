@@ -7,7 +7,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Project extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
-    protected $fillable = ['name', 'description', 'status','type'];
+    protected $fillable = ['name', 'description', 'status','type','parent_project_id'];
 
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
@@ -36,6 +36,16 @@ class Project extends Model implements Auditable
     public function usersWithRoles()
     {
         return $this->belongsToMany(User::class)->withPivot('role'); // Ensure the 'role' field exists in the pivot table
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Project::class, 'parent_project_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Project::class, 'parent_project_id');
     }
     
 }

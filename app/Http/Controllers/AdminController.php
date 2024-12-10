@@ -2,59 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\ActevitiesDataTable;
+use App\Models\Audit;
 use App\Models\Project;
 use App\Models\Statement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use OwenIt\Auditing\Models\Audit as ModelsAudit;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $user = Auth::user();
-
+    
+        // Check for admin role
         if ($user->hasRole('admin')) {
-            // Admin can see all projects and clients
-            $projects = Project::withCount([
-                'statements as completed_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_APPROVED);
-                },
-                'statements as pending_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_PENDING);
-                },
-                'statements as rejected_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_REJECTED);
-                }
-            ])->get();
-
-            // Retrieve clients as a query builder
-            $clients = User::role('client')->with('projects');
+            // Admin can see all projects and users
+            $projectsData['totalProjects'] = Project::count();
+            $projectsData['projectsApproved'] = Project::where('status', 'approved')->count();
+            $projectsData['projectsPending'] = Project::where('status', 'pending')->count();
+            $projectsData['projectsRejected'] = Project::where('status', 'rejected')->count();
+            $totalUsers = User::count();
+            $pendingActions = Project::where('status', 'pending')->count();
+            $users = User::with(['projects','roles'])->whereHas('roles',function($q){
+                $q->where('name', '!=', 'admin');
+            })->get();
+            
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','users'));
         } else {
             // Client or Auditor can see only their assigned projects
-            $projects = $user->projects()->withCount([
-                'statements as completed_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_APPROVED);
-                },
-                'statements as pending_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_PENDING);
-                },
-                'statements as rejected_statements_count' => function ($query) {
-                    $query->where('status', Statement::STATUS_REJECTED);
-                }
-            ])->get();
-
-            // Retrieve the client's own data
-            $clients = User::where('id', $user->id)->with('projects');
+            $projectsData['totalProjects'] = $user->projects()->count();
+            $projectsData['projectsApproved'] = $user->projects()->where('status', 'approved')->count();
+            $projectsData['projectsPending'] = $user->projects()->where('status', 'pending')->count();
+            $projectsData['projectsRejected'] = $user->projects()->where('status', 'rejected')->count();
+            $totalUsers = User::count();
+            $pendingActions = $user->projects()->where('status', 'pending')->count();
+            $users = User::with(['projects','roles'])->where('id', $user->id)->get();
+    
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','users'));
         }
-
-        if ($request->ajax()) {
-            return $this->dataTable($clients);
-        }
-
-        return view('admin.dashboard', compact('projects', 'clients'));
     }
+    
 
 
     protected function dataTable($clients)

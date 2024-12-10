@@ -57,20 +57,32 @@ class EvidenceController extends Controller
         $request->validate([
             'evidence' => 'required|file|mimes:pdf,docx,xlsx,jpeg,png,jpg,eml|max:10240',
         ]);
-        $file = $request->file('evidence');
-        $filePath = $file->storeAs('evidences', $file->getClientOriginalName(), 'public');
-
-        // Create Evidence record
-        $evidence = new Evidence();
-        $evidence->statement_id = $statement->id;
-        $evidence->file_name = $file->getClientOriginalName();
-        $evidence->uploaded_by = auth()->user()->id;
-        $evidence->file_path = $filePath;
-        $evidence->save();
-
-        return response()->json(['success' => true, 'message' => 'Evidence uploaded successfully.']);
-
+    
+        try {
+            $file = $request->file('evidence');
+            $filePath = $file->storeAs('evidences', $file->getClientOriginalName(), 'public');
+    
+            // Create Evidence record
+            $evidence = new Evidence();
+            $evidence->statement_id = $statement->id;
+            $evidence->file_name = $file->getClientOriginalName();
+            $evidence->uploaded_by = auth()->user()->id;
+            $evidence->file_path = $filePath;
+            $evidence->save();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Evidence uploaded successfully.',
+                'data' => $evidence
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload evidence: ' . $e->getMessage()
+            ]);
+        }
     }
+    
 
     // Allow auditors to download evidence (without viewing)
     public function download(Evidence $evidence)

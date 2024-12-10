@@ -12,25 +12,27 @@ class CommentController extends Controller
 {
     public function store(Request $request, Statement $statement)
     {
-        $commentContent = $request->getContent();
+        $commentContent = $request->comment;
 
         // Define custom validation rules
         $validator = Validator::make(['content' => $commentContent], [
             'content' => ['required', 'string', 'min:3', 'max:500'],
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
             ], 400);
         }
-      $comment =  Comment::create([
+
+        $comment = Comment::create([
             'statement_id' => $statement->id,
             'content' => $commentContent,
             'user_id' => auth()->id(),
             'role' => auth()->user()->getRoleNames()->first(),
         ]);
+
         // Notify users associated with the project
         $project = $statement->project;
 
@@ -45,11 +47,16 @@ class CommentController extends Controller
                 $user->notify(new CommentAddedNotification($comment));
             }
         }
-        return response()->json([
-            'success' => true,
-            'message' => 'Comment added successfully',
-            'comment' => $comment,
-        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment added successfully',
+                'comment' => $comment,
+            ]);
+        }
+
+        return back()->with('success', 'Comment created successfully.');
     }
 
     public function destroy(Comment $comment)

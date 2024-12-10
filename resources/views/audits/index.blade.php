@@ -1,9 +1,9 @@
-@extends('layouts.master')
+@extends('layouts.master2')
 
 @section('content')
 <div class="container">
     <h1>Audit Logs</h1>
-    <table class="table">
+    <table id="model-datatables" class="table table-bordered nowrap table-striped align-middle" style="width:100%">
         <thead>
             <tr>
                 <th>Event</th>

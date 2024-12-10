@@ -136,25 +136,53 @@ class ProjectController extends Controller
     // Store new project
     public function store(Request $request)
     {
-     $validated =  $request->validate([
+        $validated =  $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
+            'parent_project_id' => [
+                'nullable',
+                'exists:projects,id',
+                function ($attribute,
+                    $value,
+                    $fail
+                ) use ($request) {
+                    if ($request->id === $value) {
+                        $fail('A project cannot be its own parent.');
+                    }
+                },
+            ],
+
         ]);
-
-        $project = Project::create($request->only('name', 'description'));
-        if ($request->hasFile('csv_file')) {
-           
-            Excel::import(new StatementsImport($project->id), $request->file('csv_file'));
-
+        if ($validated['parent_project_id'] != null) {
+            $parent = Project::find($validated['parent_project_id']);
+            $project = Project::create([
+                'name' => $request->name,
+                'description' => $parent->description,
+                'parent_project_id' => $parent->id,
+                'type' => $parent->type,
+            ]);
         }
+        else
+        {
+
+            $project = Project::create($request->only('name', 'description','parent_project_id'));
+        }
+
+        if ($request->hasFile('csv_file')) {
+
+            Excel::import(new StatementsImport($project->id), $request->file('csv_file'));
+        }
+        $admin = User::role('admin')->first();
+        $project->users()->attach($admin->id);
         return redirect()->route('projects.index')->with('success', 'Project created successfully.');
     }
 
     // Show form to create a new project
     public function create()
     {
-        return view('projects.create');
+        $projects = Project::all();
+        return view('projects.create', compact('projects'));
     }
 
     // Edit an existing project
