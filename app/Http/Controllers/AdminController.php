@@ -38,7 +38,7 @@ class AdminController extends Controller
             $projectsData['projectsRejected'] = $user->projects()->where('status', 'rejected')->count();
             $totalUsers = User::count();
             $pendingActions = $user->projects()->where('status', 'pending')->count();
-            $projects = User::with(['users'])->whereHas('users',function($q)use($user){
+            $projects = Project::with(['users','children','parent'])->whereHas('users',function($q)use($user){
                 $q->where('user_id', $user->id);
             })->get();
             return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','projects'));

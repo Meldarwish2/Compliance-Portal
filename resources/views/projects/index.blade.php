@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h1>Assigned Projects</h1>
+        <h1>Projects</h1>
 
         {{-- Admin-only: Create Project Button --}}
         @role('admin')
@@ -12,14 +12,14 @@
         @endrole
 
         @if($projects->isEmpty())
-            <div class="alert alert-info">You have no assigned projects at the moment.</div>
+            <div class="alert alert-info">You have no projects at the moment.</div>
         @else
         <table id="model-datatables" class="table table-bordered nowrap table-striped align-middle" style="width:100%">
                 <thead>
                 <tr>
                     <th>Project Name</th>
                     <th>Description</th>
-                    <th>Parent Project</th>
+                    <th>Compliance Framework</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -110,9 +110,9 @@
                     <form action="{{ route('projects.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
-                            <label for="parent_project" class="form-label">Parent Project</label>
+                            <label for="parent_project" class="form-label">Compliance Framework</label>
                             <select name="parent_project_id" id="parent_project" class="form-control">
-                                <option value="">None (Create as Parent Project)</option>
+                                <option value="">None (Create as Compliance Framework)</option>
                                 @foreach($projects as $project)
                                 <option value="{{ $project->id }}">{{ $project->name }}</option>
                                 @endforeach
