@@ -136,9 +136,9 @@
                             @enderror
                         </div>
                        
-                        <div class="mb-3">
+                        <div class="mb-3" id="csvUploadField">
                             <label for="csvFile" class="form-label">Upload CSV File</label>
-                            <input type="file" class="form-control @error('csv_file') is-invalid @enderror" id="csvFile" name="csv_file" accept=".csv" required>
+                            <input type="file" class="form-control @error('csv_file') is-invalid @enderror" id="csvFile" name="csv_file" accept=".csv" >
                             @error('csv_file')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -189,4 +189,20 @@
 
 
 </script>
+<script>
+    document.getElementById('parent_project').addEventListener('change', function () {
+        const csvUploadField = document.getElementById('csvUploadField');
+        const csvFileInput = document.getElementById('csvFile');
+
+        if (this.value) {
+            csvUploadField.style.display = 'none';
+            csvFileInput.value = ""; // Clear file input
+            csvFileInput.removeAttribute('required'); // Remove 'required' attribute
+        } else {
+            csvUploadField.style.display = 'block';
+            csvFileInput.setAttribute('required', 'required'); // Add 'required' attribute back
+        }
+    });
+</script>
+
 @endsection

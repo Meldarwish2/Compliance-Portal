@@ -27,11 +27,9 @@ class AdminController extends Controller
             $projectsData['projectsRejected'] = Project::where('status', 'rejected')->count();
             $totalUsers = User::count();
             $pendingActions = Project::where('status', 'pending')->count();
-            $users = User::with(['projects','roles'])->whereHas('roles',function($q){
-                $q->where('name', '!=', 'admin');
-            })->get();
+            $projects = Project::with(['users','children','parent'])->get();
             
-            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','users'));
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','projects'));
         } else {
             // Client or Auditor can see only their assigned projects
             $projectsData['totalProjects'] = $user->projects()->count();
@@ -40,9 +38,10 @@ class AdminController extends Controller
             $projectsData['projectsRejected'] = $user->projects()->where('status', 'rejected')->count();
             $totalUsers = User::count();
             $pendingActions = $user->projects()->where('status', 'pending')->count();
-            $users = User::with(['projects','roles'])->where('id', $user->id)->get();
-    
-            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','users'));
+            $projects = User::with(['users'])->whereHas('users',function($q)use($user){
+                $q->where('user_id', $user->id);
+            })->get();
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','projects'));
         }
     }
     

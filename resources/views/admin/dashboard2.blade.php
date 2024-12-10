@@ -106,7 +106,7 @@
             <!-- Table Card -->
             <div class="card">
                 <div class="card-header">
-                    <h5>Users Projects</h5>
+                    <h5>Projects</h5>
                 </div>
                 <div class="card-body">
                     <table id="model-datatables" class="table table-bordered nowrap  align-center" style="width:100%">
@@ -114,23 +114,23 @@
                             <tr>
                                 <th scope="col">Id</th>
                                 <th scope="col">Name</th>
-                                <th scope="col">Role</th>
-                                <th scope="col">Assignee Projects</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Assignee Users</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($users as $user)
+                            @foreach ($projects as $project)
                             <tr>
-                                <th scope="row">{{$user->id}}</th>
-                                <td>{{$user->name}}</td>
-                                <td><span class="badge bg-success-subtle text-primary ">{{ $user->roles->first()->name }}</span></td>
+                                <th scope="row">{{$project->id}}</th>
+                                <td>{{$project->name}}</td>
+                                <td>{{$project->description}}</td>
                                 <td>
                                     <div class="avatar-group">
-                                        @foreach ($user->projects as $project)
-                                        <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="{{ $project->name }}">
+                                        @foreach ($project->users as $project_user)
+                                        <a href="javascript: void(0);" class="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="{{ $project_user->name }}">
                                             <!-- Display the first two characters of the project name -->
                                             <span class="avatar-title bg-warning rounded-circle fs-3">
-                                                {{ strtoupper(substr($project->name, 0, 2)) }}
+                                                {{ strtoupper(substr($project_user->name, 0, 2)) }}
                                             </span>
                                         </a>
                                         @endforeach

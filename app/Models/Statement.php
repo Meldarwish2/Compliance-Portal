@@ -9,7 +9,9 @@ class Statement extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     protected $fillable = ['content', 'status', 'project_id','creator_role','created_by'];
 
-    
+    protected $casts = [
+        'content' => 'array',
+    ];
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_PENDING = 'pending';

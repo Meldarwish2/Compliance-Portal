@@ -139,7 +139,7 @@ class ProjectController extends Controller
         $validated =  $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'csv_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
+            'csv_file' => 'nullable|file|mimes:csv,txt,xlsx,xls|max:2048',
             'parent_project_id' => [
                 'nullable',
                 'exists:projects,id',
@@ -162,6 +162,10 @@ class ProjectController extends Controller
                 'parent_project_id' => $parent->id,
                 'type' => $parent->type,
             ]);
+            // Copy statements from parent to new project
+            foreach ($parent->statements as $statement) {
+                $project->statements()->create($statement->toArray());
+            }
         }
         else
         {

@@ -36,7 +36,53 @@
         <tbody>
             @foreach($project->statements as $statement)
             <tr>
-                <td>{{ $statement->content }}</td>
+                <td>
+                    <!-- Button to trigger the modal -->
+                    <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#statementModal{{ $statement->id }}">
+                        View Full Statement
+                    </button>
+
+                    <!-- Modal for displaying the full statement content -->
+                    <div class="modal fade" id="statementModal{{ $statement->id }}" tabindex="-1" role="dialog" aria-labelledby="statementModalLabel{{ $statement->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="statementModalLabel{{ $statement->id }}">Statement Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    @php
+                                    $content = json_decode($statement->content, true);
+                                    @endphp
+
+                                    <h6 class="fs-15">Statement Content</h6>
+
+                                    @if(!empty($content))
+                                    @foreach($content as $key => $value)
+                                    <div class="d-flex mt-2">
+                                        <div class="flex-shrink-0">
+                                            <i class="ri-checkbox-circle-fill text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <p class="text-muted mb-0">
+                                                <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong> {{ $value ?? 'N/A' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                    @else
+                                    <p class="text-muted">No content available.</p>
+                                    @endif
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div><!-- /.modal -->
+                </td>
+
                 <td>
                     <span style="color: {{ $statement->getStatusColor() }}">
                         {{ ucfirst($statement->status) }}
@@ -75,7 +121,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 <script>
     $(document).ready(function() {
-        // const table = initializeDataTable('#statements-table');
         initializeDataTable('#statements-table');
         initializeCsvExport('#export-csv', '{{ $project->name }}');
         initializeEvidenceUpload();
@@ -88,7 +133,7 @@
             responsive: false,
             columns: [{
                     data: 'content',
-                    title: 'Statement'
+                    title: 'Statement',
                 },
                 {
                     data: 'status',
@@ -161,16 +206,12 @@
             });
     }
 
-
-
     function initializeCommentSubmission() {
         $('.submit-comment').on('click', function() {
             const statementId = $(this).data('statement-id');
             submitComment(statementId);
         });
     }
-
-
 
     function initializeStarRating() {
         $('.rating').each(function() {

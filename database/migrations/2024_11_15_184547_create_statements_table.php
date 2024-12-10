@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('statements', function (Blueprint $table) {
                 $table->id();
-                $table->text('content');
+                $table->json('content');
                 $table->string('status')->default('pending');
                 $table->unsignedBigInteger('project_id');
                 $table->string('creator_role')->nullable();
