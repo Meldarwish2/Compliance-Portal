@@ -18,6 +18,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
           @endif
+    @if(session('success'))
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          @endif
     <!-- OTP Form -->
     <form autocomplete="off" id="otp-form" method="POST" action="{{ route('verify.2fa') }}">
         @csrf
@@ -47,13 +53,13 @@
     </div>
 </div>
 <div class="mt-4 text-center">
-    <p class="mb-0">Didn't receive a code? <a href="auth-pass-reset-basic.html" class="fw-semibold text-primary text-decoration-underline">Resend</a></p>
+    <p class="mb-0">Didn't receive a code? <a href="{{route('resend.2fa')}}" class="fw-semibold text-primary text-decoration-underline">Resend</a></p>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const inputs = document.querySelectorAll('.otp-input');
-        
+
         // Add input event listeners to handle OTP field focus and key events
         inputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {

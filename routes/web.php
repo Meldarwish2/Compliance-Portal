@@ -19,7 +19,7 @@ Route::get('/', function () {
 });
 
 Auth::routes(); // Authentication routes
-
+Route::get('/resend-2fa', [TwoFactorController::class, 'resend'])->name('resend.2fa')->middleware('auth');
 // Protected routes (requires authentication)
 Route::middleware(['auth','twofactor'])->group(function () {
 
