@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Imports\StatementsImport;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PreDefinedProjects extends Seeder
 {
@@ -23,6 +26,7 @@ class PreDefinedProjects extends Seeder
             'status' => 'pending', 
             'type' => 'rating', 
         ]);
+        Excel::import(new StatementsImport($samaProject->id), public_path('statement_files/SAMA-CSF.xlsx'));
         $samaProject->users()->attach($admin);
 
         // Create the NCA project and assign it to the admin
@@ -32,6 +36,7 @@ class PreDefinedProjects extends Seeder
             'status' => 'pending', 
             'type' => 'compliance', 
         ]);
+        Excel::import(new StatementsImport($samaProject->id), public_path('statement_files/NCA.xlsx'));
         $NcaProject->users()->attach($admin);
     }
 }
