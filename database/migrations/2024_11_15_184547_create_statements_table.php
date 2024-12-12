@@ -15,6 +15,7 @@ return new class extends Migration
                 $table->id();
                 $table->json('content');
                 $table->string('status')->default('pending');
+                $table->string('rating')->nullable();
                 $table->unsignedBigInteger('project_id');
                 $table->string('creator_role')->nullable();
                 $table->unsignedBigInteger('created_by')->nullable();

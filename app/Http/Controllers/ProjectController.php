@@ -88,11 +88,10 @@ class ProjectController extends Controller
         $users = User::all();
         if (Auth::user()->hasRole('admin')) {
             $projects = Project::with(['users', 'statements', 'evidences'])->get();
-        }
-        else {
+        } else {
             $projects = Auth::user()->projects; // Only show assigned projects for the client role
         }
-        return view('projects.index', compact(['projects','users']));
+        return view('projects.index', compact(['projects', 'users']));
     }
 
     // Show project details along with users, statements, and evidences
@@ -100,7 +99,38 @@ class ProjectController extends Controller
     {
         $users = User::all();  // To assign project to a user, admin will need to select from all users
         $project->load('statements.comments', 'statements.evidences');
-        return view('projects.show', compact('project', 'users'));
+
+        // Initialize counters for ratings and statuses
+        $ratings = [0, 0, 0, 0, 0]; // For ratings 1 to 5
+        $statuses = [
+            'reject' => 0,
+            'pending' => 0,
+            'assigned_to_qa' => 0,
+        ];
+
+        // If the project type is 'rating', categorize statements by ratings and statuses
+        if ($project->type === 'rating') {
+            foreach ($project->statements as $statement) {
+                // Check if rating exists
+                if ($statement->rating >= 1 && $statement->rating <= 5) {
+                    $ratings[$statement->rating - 1]++; // Increment the count for the respective rating
+                }
+
+                // Check the status and increment the respective counter
+                switch ($statement->status) {
+                    case 'reject':
+                        $statuses['reject']++;
+                        break;
+                    case 'pending':
+                        $statuses['pending']++;
+                        break;
+                    case 'assigned_to_qa':
+                        $statuses['assigned_to_qa']++;
+                        break;
+                }
+            }
+        }
+        return view('projects.show', compact('project', 'users', 'ratings', 'statuses'));
     }
 
     // Admin assigns project to a user (auditor/client)
@@ -288,6 +318,7 @@ class ProjectController extends Controller
 
         $evidence = Evidence::findOrFail($evidenceId);
         $evidence->rating = $request->rating;
+        $evidence->statement->rating = $request->rating;
         $evidence->status = Evidence::STATUS_APPROVED;
         $evidence->statement->status = Statement::STATUS_APPROVED;
         $evidence->save();

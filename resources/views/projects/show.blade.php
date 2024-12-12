@@ -4,10 +4,22 @@
 <div class="container">
     <h1>{{ $project->name }}</h1>
     <p>{{ $project->description }}</p>
-
+    <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Project Chart</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="project-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <h2>Statements</h2>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div></div> <!-- Alignment spacer -->
+
         <div>
             @role('admin')
             @if($project->statements->isEmpty())
@@ -258,6 +270,75 @@
         return `<a href="#" class="btn btn-primary">Edit</a>`;
     }
 </script>
+<script>
+    var ratings = {!! json_encode($ratings) !!}; // Pass the ratings array from the controller
+    var statuses = {!! json_encode($statuses) !!}; // Pass the statuses array from the controller
+
+    // Prepare series data for the radial chart
+    var ratingSeries = ratings;  // This holds the count of ratings from 1 to 5
+    var statusSeries = [
+        statuses.reject,  // Reject (Red)
+        statuses.pending, // Pending (Orange)
+        statuses.assigned_to_qa  // Assigned to QA (Blue)
+    ];
+
+    var options = {
+        series: [
+            ...ratingSeries,  // Ratings 1-5
+            ...statusSeries   // Reject, Pending, Assigned to QA
+        ],
+        chart: {
+            height: 450,
+            // type: 'donut',
+            type: 'radialBar',
+        },
+        plotOptions: {
+            radialBar: {
+                size: 100,
+                hollow: {
+                size: '50', // Adjust the hollow size as a percentage of the total circle size
+                background: '#fff', // Color for the hollow area
+            },
+            track: {
+                background: '#e0e0e0', // Track (outer circle) color
+                strokeWidth: '97%', // Thickness of the track circle
+                margin: 5, // Margin between the track and radial bars
+            },
+                dataLabels: {
+                    name: {
+                        fontSize: '22px',
+                    },
+                    value: {
+                        fontSize: '16px',
+                    },
+                    total: {
+                        show: true,
+                        label: 'Total',
+                        formatter: function(w) {
+                            // Custom total calculation (this could sum all the series)
+                            return ratingSeries.reduce((a, b) => a + b, 0) + statusSeries.reduce((a, b) => a + b, 0);
+                        }
+                    },
+                    
+                }
+            }
+        },
+        labels: [
+            'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5', // Ratings labels
+            'Reject', 'Pending', 'Assigned to QA' // Status labels
+        ],
+        colors: [
+            '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99', // Green shades for ratings
+            '#FF0000', '#FFA500', '#0000FF' // Red, Orange, Blue for statuses
+        ]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#project-chart"), options);
+    chart.render();
+</script>
+
+
+
 @endpush
 
 @push('styles')
