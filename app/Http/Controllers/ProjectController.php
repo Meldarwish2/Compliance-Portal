@@ -169,6 +169,7 @@ class ProjectController extends Controller
         $validated =  $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'client_name' => 'nullable|string',
             'csv_file' => 'nullable|file|mimes:csv,txt,xlsx,xls|max:2048',
             'parent_project_id' => [
                 'nullable',

@@ -5,13 +5,23 @@
     <h1>{{ $project->name }}</h1>
     <p>{{ $project->description }}</p>
     <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-6">
                 <div class="card">
                     <div class="card-header">
                         <h5>Project Chart</h5>
                     </div>
                     <div class="card-body">
                         <div id="project-chart"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Project Chart</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="project-chart2"></div>
                     </div>
                 </div>
             </div>
@@ -177,6 +187,50 @@
             downloadCsv(csv, `${filename}_statements.csv`);
         });
     }
+    function generateCsvFromTable(tableSelector) {
+    const rows = [];
+    const table = document.querySelector(tableSelector);
+
+    if (!table) {
+        console.error(`Table with selector "${tableSelector}" not found.`);
+        return '';
+    }
+
+    // Get table headers
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    rows.push(headers.join(',')); // Add headers to the CSV
+
+    // Get table rows
+    const bodyRows = table.querySelectorAll('tbody tr');
+    bodyRows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td')).map(td => {
+            // Remove commas from data to prevent CSV corruption
+            return `"${td.textContent.trim().replace(/"/g, '""')}"`; 
+        });
+        rows.push(cells.join(',')); // Add row to the CSV
+    });
+
+    return rows.join('\n'); // Combine all rows into a CSV string
+}
+
+function downloadCsv(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    // Check for browser support
+    if (navigator.msSaveBlob) {
+        navigator.msSaveBlob(blob, filename); // For IE10+
+    } else {
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
 
     function initializeEvidenceUpload() {
         $('.submit-evidence').on('click', function() {
@@ -336,10 +390,95 @@
     var chart = new ApexCharts(document.querySelector("#project-chart"), options);
     chart.render();
 </script>
+<script>
+    var ratings = {!! json_encode($ratings) !!}; // Pass the ratings array from the controller
+    var statuses = {!! json_encode($statuses) !!}; // Pass the statuses array from the controller
+
+    // Prepare series data for the donut chart
+    var ratingSeries = ratings;  // This holds the count of ratings from 1 to 5
+    var statusSeries = [
+        statuses.reject,  // Reject (Red)
+        statuses.pending, // Pending (Orange)
+        statuses.assigned_to_qa  // Assigned to QA (Blue)
+    ];
+
+    var options = {
+        series: [
+            ...ratingSeries,  // Ratings 1-5
+            ...statusSeries   // Reject, Pending, Assigned to QA
+        ],
+        chart: {
+            height: 350,
+            type: 'donut', // Change the chart type to 'donut'
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '50%', // Adjust the size of the donut hole
+                    labels: {
+                        show: true,
+                        name: {
+                            fontSize: '22px',
+                        },
+                        value: {
+                            fontSize: '16px',
+                        },
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            formatter: function(w) {
+                                // Custom total calculation (this could sum all the series)
+                                return ratingSeries.reduce((a, b) => a + b, 0) + statusSeries.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        labels: [
+            'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5', // Ratings labels
+            'Reject', 'Pending', 'Assigned to QA' // Status labels
+        ],
+        colors: [
+            '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99', // Green shades for ratings
+            '#FF0000', '#FFA500', '#0000FF' // Red, Orange, Blue for statuses
+        ]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#project-chart2"), options);
+    chart.render();
+</script>
 
 
 
 @endpush
+
+@push('scripts')
+<script>
+    function equalizeChartHeights() {
+        const chart1 = document.getElementById('project-chart');
+        const chart2 = document.getElementById('project-chart2');
+
+        if (chart1 && chart2) {
+            // Reset heights to calculate natural heights
+            chart1.style.height = 'auto';
+            chart2.style.height = 'auto';
+
+            // Get the maximum height between the two
+            const maxHeight = Math.max(chart1.offsetHeight, chart2.offsetHeight);
+
+            // Set both charts to the maximum height
+            chart1.style.height = `${maxHeight}px`;
+            chart2.style.height = `${maxHeight}px`;
+        }
+    }
+
+    // Equalize heights on document load and window resize
+    document.addEventListener('DOMContentLoaded', equalizeChartHeights);
+    window.addEventListener('resize',equalizeChartHeights);
+</script>
+@endpush
+
 
 @push('styles')
 <style>
@@ -352,6 +491,29 @@
     .rating .star.hover,
     .rating .star.selected {
         color: #ffcc00;
+    }
+    /* Ensure both chart containers are flexible */
+    #project-chart, #project-chart2 {
+        width: 100%; /* Full width of the card */
+        min-height: 400px; /* Optional: Set a minimum height */
+    }
+
+    /* Ensure the parent row and columns stretch */
+    .row {
+        display: flex;
+        flex-wrap: wrap; /* Prevent overflow on small screens */
+    }
+
+    .col-lg-6 {
+        display: flex;
+        flex-direction: column; /* Ensure child elements stack */
+    }
+
+    .card-body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%; /* Stretch to match the card */
     }
 </style>
 @endpush
