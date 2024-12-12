@@ -27,9 +27,24 @@ class AdminController extends Controller
             $projectsData['projectsRejected'] = Project::where('status', 'rejected')->count();
             $totalUsers = User::count();
             $pendingActions = Project::where('status', 'pending')->count();
-            $projects = Project::with(['users','children','parent'])->get();
-            
-            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','projects'));
+
+            // Fetch projects with relationships
+            $projects = Project::with(['users', 'children', 'parent', 'statements'])->get();
+
+            // Calculate completion percentage for each project
+            $projects->each(function ($project) {
+                $totalStatements = $project->statements->count();
+                $approvedStatements = $project->statements->where('status', 'approved')->count();
+                $project->completionPercentage = $totalStatements > 0 ? round(($approvedStatements / $totalStatements) * 100) : 10;
+            });
+
+            // Assign unique colors to each project
+            $colors = [ '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5', '#F5FF33'];
+            $projects->each(function ($project, $index) use ($colors) {
+                $project->color = $colors[$index % count($colors)];
+            });
+
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions', 'projects'));
         } else {
             // Client or Auditor can see only their assigned projects
             $projectsData['totalProjects'] = $user->projects()->count();
@@ -38,13 +53,30 @@ class AdminController extends Controller
             $projectsData['projectsRejected'] = $user->projects()->where('status', 'rejected')->count();
             $totalUsers = User::count();
             $pendingActions = $user->projects()->where('status', 'pending')->count();
-            $projects = Project::with(['users','children','parent'])->whereHas('users',function($q)use($user){
-                $q->where('user_id', $user->id);
-            })->get();
-            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions','projects'));
+
+            // Fetch projects with relationships for the current user
+            $projects = Project::with(['users', 'children', 'parent', 'statements'])
+                ->whereHas('users', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })->get();
+
+            // Calculate completion percentage for each project
+            $projects->each(function ($project) {
+                $totalStatements = $project->statements->count();
+                $approvedStatements = $project->statements->where('status', 'approved')->count();
+                $project->completionPercentage = $totalStatements > 0 ? round(($approvedStatements / $totalStatements) * 100) : 0;
+            });
+
+            // Assign unique colors to each project
+            $colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF', '#33FFF5', '#F5FF33'];
+            $projects->each(function ($project, $index) use ($colors) {
+                $project->color = $colors[$index % count($colors)];
+            });
+
+            return view('admin.dashboard2', compact('projectsData', 'totalUsers', 'pendingActions', 'projects'));
         }
     }
-    
+
 
 
     protected function dataTable($clients)
