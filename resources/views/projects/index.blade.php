@@ -37,7 +37,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($projects as $project)
+            @foreach($projects->whereNotNull('parent_project_id') as $project)
             <tr>
                 <td>{{ $project->name }}</td>
                 <td>{{ $project->description }}</td>
@@ -126,7 +126,7 @@
                         <label for="parent_project" class="form-label">Compliance Framework</label>
                         <select name="parent_project_id" id="parent_project" class="form-control">
                             <option value="">None (Create as Compliance Framework)</option>
-                            @foreach($projects as $project)
+                            @foreach($projects->whereNull('parent_project_id') as $project)
                             <option value="{{ $project->id }}">{{ $project->name }}</option>
                             @endforeach
                         </select>
@@ -192,11 +192,11 @@
     });
 
     // Show spinner when the "Delete Project" form is submitted
-    @foreach($projects as $project)
-    document.getElementById('deleteProjectForm{{ $project->id }}').addEventListener('submit', function(e) {
-        showLoadingSpinner();
-    });
-    @endforeach
+    // @foreach($projects as $project)
+    // document.getElementById('deleteProjectForm{{ $project->id }}').addEventListener('submit', function(e) {
+    //     showLoadingSpinner();
+    // });
+    // @endforeach
 
     document.getElementById('parent_project').addEventListener('change', function() {
         const clientNameField = document.getElementById('clientNameField');

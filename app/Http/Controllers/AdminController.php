@@ -21,15 +21,15 @@ class AdminController extends Controller
         // Check for admin role
         if ($user->hasRole('admin')) {
             // Admin can see all projects and users
-            $projectsData['totalProjects'] = Project::count();
-            $projectsData['projectsApproved'] = Project::where('status', 'approved')->count();
-            $projectsData['projectsPending'] = Project::where('status', 'pending')->count();
-            $projectsData['projectsRejected'] = Project::where('status', 'rejected')->count();
+            $projectsData['totalProjects'] = Project::whereNotNull('parent_project_id')->count();
+            $projectsData['projectsApproved'] = Project::whereNotNull('parent_project_id')->where('status', 'approved')->count();
+            $projectsData['projectsPending'] = Project::whereNotNull('parent_project_id')->where('status', 'pending')->count();
+            $projectsData['projectsRejected'] = Project::whereNotNull('parent_project_id')->where('status', 'rejected')->count();
             $totalUsers = User::count();
-            $pendingActions = Project::where('status', 'pending')->count();
+            $pendingActions = Project::whereNotNull('parent_project_id')->where('status', 'pending')->count();
 
             // Fetch projects with relationships
-            $projects = Project::with(['users', 'children', 'parent', 'statements'])->get();
+            $projects = Project::whereNotNull('parent_project_id')->with(['users', 'children', 'parent', 'statements'])->get();
 
             // Calculate completion percentage for each project
             $projects->each(function ($project) {

@@ -18,7 +18,9 @@
                                 <select name="user_id" id="user_id" class="form-select" required>
                                     <option value="" disabled selected>Select a user</option>
                                     @foreach($users as $user)
+                                    @if(!$project->users->contains($user->id))
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endif
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback">

@@ -153,7 +153,7 @@
         })->toJson() !!};
                 var options = {
                     series: [{
-                        name: 'Completion Percentage',
+                        name: '%',
                         data: seriesData.map(item => ({
                             x: item.x,
                             y: item.y
@@ -188,9 +188,17 @@
                         show: true
                     },
                     yaxis: {
+                        min: 2,  // Set the minimum value to 2%
+                        max: 100,  // Set the maximum value to 100%
+                        forceNiceScale: true,  // Ensure integer steps
                         title: {
                             text: 'Completion Percentage',
                         },
+                        labels: {
+                            formatter: function(value) {
+                                return value + '%';  // Append '%' to y-axis labels
+                            }
+                        }
                     },
                     fill: {
                         type: 'solid',

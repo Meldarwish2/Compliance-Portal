@@ -107,7 +107,7 @@ class ProjectController extends Controller
             case 'rating':
                 $data['ratings'] = [0, 0, 0, 0, 0]; // Ratings 1 to 5
                 $data['statuses'] = [
-                    'reject' => 0,
+                    'rejected' => 0,
                     'pending' => 0,
                     'assigned_to_qa' => 0,
                 ];
@@ -117,8 +117,8 @@ class ProjectController extends Controller
                         $data['ratings'][$statement->rating - 1]++;
                     }
                     switch ($statement->status) {
-                        case 'reject':
-                            $data['statuses']['reject']++;
+                        case 'rejected':
+                            $data['statuses']['rejected']++;
                             break;
                         case 'pending':
                             $data['statuses']['pending']++;
@@ -366,7 +366,6 @@ class ProjectController extends Controller
         $request->validate([
             'rating' => 'required|integer|between:1,5',
         ]);
-
         $evidence = Evidence::findOrFail($evidenceId);
         $evidence->rating = $request->rating;
         $evidence->statement->rating = $request->rating;

@@ -214,11 +214,14 @@
     $(document).ready(function() {
         // When a rating is selected
         $('input[name="rating"]').on('change', function() {
+            // Find the closest form to the changed input
+                var form = $(this).closest('form');
+
             // Get the selected rating value
             var rating = $(this).val();
 
             // Get the evidence ID from the form's data-evidence-id attribute
-            var evidenceId = $('#rating-form').data('evidence-id');
+            var evidenceId = form.data('evidence-id');
 
             // Send the AJAX request to update the rating
             $.ajax({
@@ -235,9 +238,11 @@
                     // Handle the success response
                     alert('Rating submitted successfully!');
                     console.log(response);
+                    console.log(data);
                     // Reload the DataTable 
                 },
                 error: function(xhr, status, error) {
+                    console.log(data);
                     // Handle the error response
                     alert('There was an error submitting your rating.');
                 }
@@ -445,13 +450,13 @@
         case 'rating':
             series = [
                 ...data.ratings, // Ratings 1-5
-                data.statuses.reject, // Reject
+                data.statuses.rejected, // rejected
                 data.statuses.pending, // Pending
                 data.statuses.assigned_to_qa // Assigned to QA
             ];
             labels = [
                 'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5',
-                'Reject', 'Pending', 'Assigned to QA'
+                'rejected', 'Pending', 'Assigned to QA'
             ];
             colors = [
                 '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99',
