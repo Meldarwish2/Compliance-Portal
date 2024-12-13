@@ -356,10 +356,13 @@
                 return response.json();
             })
             .then(data => {
+                console.log('Server response:', data);
                 if (data.success) {
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
                     form.reset();
-                    table.ajax.reload(null, false); // Reload without resetting pagination
+                    if (data.data && Array.isArray(data.data)) {
+                        table.clear().rows.add(data.data).draw(); // Update the table with new data
+                    }
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                 }
@@ -432,9 +435,7 @@
 </script>
 <script>
     var projectType = "{{ $project->type }}"; // Get the project type from the backend
-    var data = {
-        !!json_encode($data) !!
-    }; // Pass the data array from the controller
+    var data = {!!json_encode($data)!!};
 
     var options;
     var series, labels, colors;
