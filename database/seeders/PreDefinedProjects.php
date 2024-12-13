@@ -21,8 +21,8 @@ class PreDefinedProjects extends Seeder
 
         // Create the Sama project and assign it to the admin
         $samaProject = Project::create([
-            'name' => 'Sama',
-            'description' => 'Pre-defined project for Sama',
+            'name' => 'SAMA CSF',
+            'description' => 'Pre-defined project for SAMA CSF',
             'status' => 'pending', 
             'type' => 'rating', 
         ]);

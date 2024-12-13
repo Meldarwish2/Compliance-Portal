@@ -37,6 +37,7 @@
     <link href="{{asset('assets2/css/app.min.css')}}" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
     <link href="{{asset('assets2/css/custom.min.css')}}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
 </head>
@@ -381,6 +382,9 @@
     <!-- Modal Js -->
     <!-- <script src="{{asset('assets2/js/pages/modal.init.js')}}"></script> -->
 
+    <script src="{{asset('assets2/libs/rater-js/index.js')}}"></script>
+    <!-- rating init -->
+    <script src="{{asset('assets2/js/pages/rating.init.js')}}"></script>
 
     <!-- App js -->
     <script src="{{asset('assets2/js/app.js')}}"></script>

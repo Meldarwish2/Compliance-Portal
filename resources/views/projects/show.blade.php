@@ -1,31 +1,91 @@
 @extends('layouts.master2')
 
+<style>
+    .rate {
+        border-bottom-right-radius: 12px;
+        border-bottom-left-radius: 12px
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center
+    }
+
+    .rating>input {
+        display: none
+    }
+
+    .rating>label {
+        position: relative;
+        width: 1em;
+        font-size: 30px;
+        font-weight: 300;
+        color: #FFD600;
+        cursor: pointer
+    }
+
+    .rating>label::before {
+        content: "\2605";
+        position: absolute;
+        opacity: 0
+    }
+
+    .rating>label:hover:before,
+    .rating>label:hover~label:before {
+        opacity: 1 !important
+    }
+
+    .rating>input:checked~label:before {
+        opacity: 1
+    }
+
+    .rating:hover>input:checked~label:before {
+        opacity: 0.4
+    }
+
+    .buttons {
+        top: 36px;
+        position: relative
+    }
+
+    .rating-submit {
+        border-radius: 8px;
+        color: #fff;
+        height: auto
+    }
+
+    .rating-submit:hover {
+        color: #fff
+    }
+</style>
+
 @section('content')
 <div class="container">
     <h1>{{ $project->name }}</h1>
     <p>{{ $project->description }}</p>
     <div class="row">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Project Chart</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="project-chart"></div>
-                    </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Project Chart</h5>
                 </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Project Chart</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="project-chart2"></div>
-                    </div>
+                <div class="card-body">
+                    <div id="project-chart"></div>
                 </div>
             </div>
         </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Project Chart</h5>
+                </div>
+                <div class="card-body">
+                    <div id="project-chart2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <h2>Statements</h2>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div></div> <!-- Alignment spacer -->
@@ -150,6 +210,41 @@
         initializeStarRating();
     });
 
+
+    $(document).ready(function() {
+        // When a rating is selected
+        $('input[name="rating"]').on('change', function() {
+            // Get the selected rating value
+            var rating = $(this).val();
+
+            // Get the evidence ID from the form's data-evidence-id attribute
+            var evidenceId = $('#rating-form').data('evidence-id');
+
+            // Send the AJAX request to update the rating
+            $.ajax({
+
+                url: '{{ route("evidences.rate", ":id") }}'.replace(':id', evidenceId),
+
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}', // CSRF token for security
+                    rating: rating,
+                    evidence_id: evidenceId // Send the evidence ID
+                },
+                success: function(response) {
+                    // Handle the success response
+                    alert('Rating submitted successfully!');
+                    console.log(response);
+                    // Reload the DataTable 
+                },
+                error: function(xhr, status, error) {
+                    // Handle the error response
+                    alert('There was an error submitting your rating.');
+                }
+            });
+        });
+    });
+
     function initializeDataTable(selector) {
         return $(selector).DataTable({
             responsive: false,
@@ -187,49 +282,52 @@
             downloadCsv(csv, `${filename}_statements.csv`);
         });
     }
+
     function generateCsvFromTable(tableSelector) {
-    const rows = [];
-    const table = document.querySelector(tableSelector);
+        const rows = [];
+        const table = document.querySelector(tableSelector);
 
-    if (!table) {
-        console.error(`Table with selector "${tableSelector}" not found.`);
-        return '';
-    }
+        if (!table) {
+            console.error(`Table with selector "${tableSelector}" not found.`);
+            return '';
+        }
 
-    // Get table headers
-    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-    rows.push(headers.join(',')); // Add headers to the CSV
+        // Get table headers
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+        rows.push(headers.join(',')); // Add headers to the CSV
 
-    // Get table rows
-    const bodyRows = table.querySelectorAll('tbody tr');
-    bodyRows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td')).map(td => {
-            // Remove commas from data to prevent CSV corruption
-            return `"${td.textContent.trim().replace(/"/g, '""')}"`; 
+        // Get table rows
+        const bodyRows = table.querySelectorAll('tbody tr');
+        bodyRows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td')).map(td => {
+                // Remove commas from data to prevent CSV corruption
+                return `"${td.textContent.trim().replace(/"/g, '""')}"`;
+            });
+            rows.push(cells.join(',')); // Add row to the CSV
         });
-        rows.push(cells.join(',')); // Add row to the CSV
-    });
 
-    return rows.join('\n'); // Combine all rows into a CSV string
-}
-
-function downloadCsv(csvContent, filename) {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-
-    // Check for browser support
-    if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(blob, filename); // For IE10+
-    } else {
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        return rows.join('\n'); // Combine all rows into a CSV string
     }
-}
+
+    function downloadCsv(csvContent, filename) {
+        const blob = new Blob([csvContent], {
+            type: 'text/csv;charset=utf-8;'
+        });
+        const link = document.createElement('a');
+
+        // Check for browser support
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, filename); // For IE10+
+        } else {
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
 
 
     function initializeEvidenceUpload() {
@@ -283,33 +381,41 @@ function downloadCsv(csvContent, filename) {
         $('.rating').each(function() {
             setupStarRating($(this));
         });
+    }
 
-        function setupStarRating(element) {
-            const stars = element.find('.star');
+    function setupStarRating(element) {
+        const stars = element.find('.star');
 
-            // Handle mouseover to highlight stars
-            stars.on('mouseover', function() {
-                const index = $(this).index();
-                stars.each(function(i) {
-                    $(this).toggleClass('hover', i <= index);
-                });
+        // Handle mouseover to highlight stars
+        stars.on('mouseover', function() {
+            const index = $(this).data('rating') - 1; // Using data-rating instead of index()
+            stars.each(function(i) {
+                $(this).toggleClass('hover', i <= index);
+            });
+        });
+
+        // Handle mouseleave to remove highlights
+        stars.on('mouseleave', function() {
+            stars.removeClass('hover');
+        });
+
+        // Handle click to select stars
+        stars.on('click', function() {
+            const index = $(this).data('rating') - 1; // Using data-rating instead of index()
+            stars.each(function(i) {
+                $(this).toggleClass('selected', i <= index);
             });
 
-            // Handle mouseleave to remove highlights
-            stars.on('mouseleave', function() {
-                stars.removeClass('hover');
-            });
+            // Optionally, store the selected value in a hidden input or data attribute
+            const ratingValue = index + 1;
+            element.find('input.rating-value').val(ratingValue);
+        });
 
-            // Handle click to select stars
-            stars.on('click', function() {
-                const index = $(this).index();
-                stars.each(function(i) {
-                    $(this).toggleClass('selected', i <= index);
-                });
-
-                // Optionally, store the selected value in a hidden input or data attribute
-                const ratingValue = index + 1;
-                element.find('input.rating-value').val(ratingValue);
+        // Set initial rating (if exists)
+        const initialRating = element.find('input.rating-value').val();
+        if (initialRating) {
+            stars.each(function(i) {
+                $(this).toggleClass('selected', i < initialRating);
             });
         }
     }
@@ -326,7 +432,9 @@ function downloadCsv(csvContent, filename) {
 </script>
 <script>
     var projectType = "{{ $project->type }}"; // Get the project type from the backend
-    var data = {!! json_encode($data) !!}; // Pass the data array from the controller
+    var data = {
+        !!json_encode($data) !!
+    }; // Pass the data array from the controller
 
     var options;
     var series, labels, colors;
@@ -356,8 +464,8 @@ function downloadCsv(csvContent, filename) {
                 data.statuses.rejected, // Rejected
                 data.statuses.pending, // Pending
             ];
-            labels = ['Approved', 'Rejected','Pending'];
-            colors = ['#008000', '#FF0000','#FFA500']; // Green and Red
+            labels = ['Approved', 'Rejected', 'Pending'];
+            colors = ['#008000', '#FF0000', '#FFA500']; // Green and Red
             break;
 
         case 'compliance':
@@ -367,7 +475,7 @@ function downloadCsv(csvContent, filename) {
                 data.statuses.rejected, // Rejected
                 data.statuses.pending, // Pending
             ];
-            labels = ['Compliant', 'Partially Compliant', 'Rejected','Pending'];
+            labels = ['Compliant', 'Partially Compliant', 'Rejected', 'Pending'];
             colors = ['#008000', '#FFA500', '#FF0000', '#FFA500']; // Green, Orange, Red
             break;
     }
@@ -485,7 +593,7 @@ function downloadCsv(csvContent, filename) {
 
     // Equalize heights on document load and window resize
     document.addEventListener('DOMContentLoaded', equalizeChartHeights);
-    window.addEventListener('resize',equalizeChartHeights);
+    window.addEventListener('resize', equalizeChartHeights);
 </script>
 @endpush
 
@@ -502,28 +610,35 @@ function downloadCsv(csvContent, filename) {
     .rating .star.selected {
         color: #ffcc00;
     }
+
     /* Ensure both chart containers are flexible */
-    #project-chart, #project-chart2 {
-        width: 100%; /* Full width of the card */
-        min-height: 400px; /* Optional: Set a minimum height */
+    #project-chart,
+    #project-chart2 {
+        width: 100%;
+        /* Full width of the card */
+        min-height: 400px;
+        /* Optional: Set a minimum height */
     }
 
     /* Ensure the parent row and columns stretch */
     .row {
         display: flex;
-        flex-wrap: wrap; /* Prevent overflow on small screens */
+        flex-wrap: wrap;
+        /* Prevent overflow on small screens */
     }
 
     .col-lg-6 {
         display: flex;
-        flex-direction: column; /* Ensure child elements stack */
+        flex-direction: column;
+        /* Ensure child elements stack */
     }
 
     .card-body {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%; /* Stretch to match the card */
+        height: 100%;
+        /* Stretch to match the card */
     }
 </style>
 @endpush

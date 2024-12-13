@@ -21,83 +21,82 @@
 
         @role('auditor')
         @if($project->type == 'accept_reject')
-            @foreach($statement->evidences as $evidence)
-                <li>
-                    <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
-                        <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
-                    </a>
-                </li>
-                <li>
-                    <form action="{{ route('evidences.approve', $evidence->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="dropdown-item">
-                            <i class="ri-check-line align-bottom me-2 text-muted"></i> Approve
-                        </button>
-                    </form>
-                </li>
-                <li>
-                    <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="dropdown-item">
-                            <i class="ri-close-line align-bottom me-2 text-muted"></i> Reject
-                        </button>
-                    </form>
-                </li>
-            @endforeach
+        @foreach($statement->evidences as $evidence)
+        <li>
+            <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
+                <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
+            </a>
+        </li>
+        <li>
+            <form action="{{ route('evidences.approve', $evidence->id) }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                    <i class="ri-check-line align-bottom me-2 text-muted"></i> Approve
+                </button>
+            </form>
+        </li>
+        <li>
+            <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                    <i class="ri-close-line align-bottom me-2 text-muted"></i> Reject
+                </button>
+            </form>
+        </li>
+        @endforeach
         @elseif($project->type == 'rating')
-            @foreach($statement->evidences as $evidence)
-                <li>
-                    <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
-                        <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
-                    </a>
-                </li>
-                <li>
-                
-                  @include('partials.statement-rating')
-                 
-                </li>
-                <li>
-                    <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="dropdown-item">
-                            <i class="ri-close-line align-bottom me-2 text-muted"></i> Reject
-                        </button>
-                    </form>
-                </li>
-            @endforeach
+        @foreach($statement->evidences as $evidence)
+        <li>
+            <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
+                <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
+            </a>
+        </li>
+        <li class="dropdown-item">
+            @include('partials.statement-rating')
+        </li>
+
+        <li>
+            <form action="{{ route('evidences.reject', $evidence->id) }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                    <i class="ri-close-line align-bottom me-2 text-muted"></i> Reject
+                </button>
+            </form>
+        </li>
+        @endforeach
         @elseif($project->type == 'compliance')
-            @foreach($statement->evidences as $evidence)
-                <li>
-                    <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
-                        <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
-                    </a>
-                </li>
-                <li>
-                    <div class="compliance-buttons">
-                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <input type="hidden" name="compliance" value="compliant">
-                            <button type="submit" class="dropdown-item">
-                                <i class="ri-check-line align-bottom me-2 text-muted"></i> Compliant
-                            </button>
-                        </form>
-                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <input type="hidden" name="compliance" value="partially_compliant">
-                            <button type="submit" class="dropdown-item">
-                                <i class="ri-question-line align-bottom me-2 text-muted"></i> Partially Compliant
-                            </button>
-                        </form>
-                        <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <input type="hidden" name="compliance" value="rejected">
-                            <button type="submit" class="dropdown-item">
-                                <i class="ri-close-line align-bottom me-2 text-muted"></i> Rejected
-                            </button>
-                        </form>
-                    </div>
-                </li>
-            @endforeach
+        @foreach($statement->evidences as $evidence)
+        <li>
+            <a href="{{ route('evidences.download', $evidence->id) }}" class="dropdown-item">
+                <i class="ri-download-2-fill align-bottom me-2 text-muted"></i> Download Evidence
+            </a>
+        </li>
+        <li>
+            <div class="compliance-buttons">
+                <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="compliance" value="compliant">
+                    <button type="submit" class="dropdown-item">
+                        <i class="ri-check-line align-bottom me-2 text-muted"></i> Compliant
+                    </button>
+                </form>
+                <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="compliance" value="partially_compliant">
+                    <button type="submit" class="dropdown-item">
+                        <i class="ri-question-line align-bottom me-2 text-muted"></i> Partially Compliant
+                    </button>
+                </form>
+                <form action="{{ route('evidences.compliance', $evidence->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="compliance" value="rejected">
+                    <button type="submit" class="dropdown-item">
+                        <i class="ri-close-line align-bottom me-2 text-muted"></i> Rejected
+                    </button>
+                </form>
+            </div>
+        </li>
+        @endforeach
         @endif
         @endrole
 
