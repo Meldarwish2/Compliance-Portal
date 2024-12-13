@@ -138,7 +138,7 @@
                     {{-- Client Name Input Field --}}
                     <div class="mb-3" id="clientNameField" style="display: none;">
                         <label for="clientName" class="form-label">Client Name</label>
-                        <input type="text" class="form-control @error('client_name') is-invalid @enderror" id="clientName" name="client_name" required>
+                        <input type="text" class="form-control @error('client_name') is-invalid @enderror" id="clientName" name="client_name" >
                         @error('client_name')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -147,7 +147,7 @@
                     {{-- Project Name Input Field --}}
                     <div class="mb-3" id="projectNameField">
                         <label for="projectName" class="form-label">Project Name</label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="projectName" name="name" required>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="projectName" name="name">
                         @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

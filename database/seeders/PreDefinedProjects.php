@@ -38,5 +38,25 @@ class PreDefinedProjects extends Seeder
         ]);
         Excel::import(new StatementsImport($samaProject->id), public_path('statement_files/NCA.xlsx'));
         $NcaProject->users()->attach($admin);
+
+        // Create the ISO project and assign it to the admin
+        $ISOProject = Project::create([
+            'name' => 'ISO-27001',
+            'description' => 'Pre-defined project for ISO',
+            'status' => 'pending', 
+            'type' => 'accept_reject', 
+        ]);
+        Excel::import(new StatementsImport($ISOProject->id), public_path('statement_files/ISO-27001.xlsx'));
+        $ISOProject->users()->attach($admin);
+
+        // Create the PCI project and assign it to the admin
+        $PCIProject = Project::create([
+            'name' => 'PCI-DSS-v4.0',
+            'description' => 'Pre-defined project for PCI-DSS-v4.0',
+            'status' => 'pending', 
+            'type' => 'accept_reject', 
+        ]);
+        Excel::import(new StatementsImport($PCIProject->id), public_path('statement_files/PCI-DSS-v4.0.xlsx'));
+        $PCIProject->users()->attach($admin);
     }
 }
