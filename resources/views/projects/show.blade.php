@@ -325,39 +325,117 @@ function downloadCsv(csvContent, filename) {
     }
 </script>
 <script>
-    var ratings = {!! json_encode($ratings) !!}; // Pass the ratings array from the controller
-    var statuses = {!! json_encode($statuses) !!}; // Pass the statuses array from the controller
+    var projectType = "{{ $project->type }}"; // Get the project type from the backend
+    var data = {!! json_encode($data) !!}; // Pass the data array from the controller
 
-    // Prepare series data for the radial chart
-    var ratingSeries = ratings;  // This holds the count of ratings from 1 to 5
-    var statusSeries = [
-        statuses.reject,  // Reject (Red)
-        statuses.pending, // Pending (Orange)
-        statuses.assigned_to_qa  // Assigned to QA (Blue)
-    ];
+    var options;
+    var series, labels, colors;
 
-    var options = {
-        series: [
-            ...ratingSeries,  // Ratings 1-5
-            ...statusSeries   // Reject, Pending, Assigned to QA
-        ],
+    // Prepare data and configurations based on the project type
+    switch (projectType) {
+        case 'rating':
+            series = [
+                ...data.ratings, // Ratings 1-5
+                data.statuses.reject, // Reject
+                data.statuses.pending, // Pending
+                data.statuses.assigned_to_qa // Assigned to QA
+            ];
+            labels = [
+                'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5',
+                'Reject', 'Pending', 'Assigned to QA'
+            ];
+            colors = [
+                '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99',
+                '#FF0000', '#FFA500', '#0000FF'
+            ];
+            break;
+
+        case 'accept_reject':
+            series = [
+                data.statuses.approved, // Approved
+                data.statuses.rejected, // Rejected
+                data.statuses.pending, // Pending
+            ];
+            labels = ['Approved', 'Rejected','Pending'];
+            colors = ['#008000', '#FF0000','#FFA500']; // Green and Red
+            break;
+
+        case 'compliance':
+            series = [
+                data.statuses.compliant, // Compliant
+                data.statuses.partially_compliant, // Partially Compliant
+                data.statuses.rejected, // Rejected
+                data.statuses.pending, // Pending
+            ];
+            labels = ['Compliant', 'Partially Compliant', 'Rejected','Pending'];
+            colors = ['#008000', '#FFA500', '#FF0000', '#FFA500']; // Green, Orange, Red
+            break;
+    }
+
+    // Common chart configuration
+    var commonOptions = {
+        series: series,
+        labels: labels,
+        colors: colors,
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '50%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            formatter: function(w) {
+                                return series.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            },
+            radialBar: {
+                dataLabels: {
+                    total: {
+                        show: true,
+                        label: 'Total',
+                        formatter: function(w) {
+                            return series.reduce((a, b) => a + b, 0);
+                        }
+                    }
+                }
+            }
+        },
+    };
+
+    // Donut Chart Configuration
+    var donutOptions = {
+        ...commonOptions,
+        chart: {
+            height: 350,
+            type: 'donut',
+        }
+    };
+
+    var donutChart = new ApexCharts(document.querySelector("#project-chart2"), donutOptions);
+    donutChart.render();
+
+    // Radial Chart Configuration
+    var radialOptions = {
+        ...commonOptions,
         chart: {
             height: 450,
-            // type: 'donut',
             type: 'radialBar',
         },
         plotOptions: {
             radialBar: {
-                size: 100,
                 hollow: {
-                size: '50', // Adjust the hollow size as a percentage of the total circle size
-                background: '#fff', // Color for the hollow area
-            },
-            track: {
-                background: '#e0e0e0', // Track (outer circle) color
-                strokeWidth: '97%', // Thickness of the track circle
-                margin: 5, // Margin between the track and radial bars
-            },
+                    size: '50%',
+                },
+                track: {
+                    background: '#e0e0e0',
+                    strokeWidth: '97%',
+                    margin: 5,
+                },
                 dataLabels: {
                     name: {
                         fontSize: '22px',
@@ -369,84 +447,16 @@ function downloadCsv(csvContent, filename) {
                         show: true,
                         label: 'Total',
                         formatter: function(w) {
-                            // Custom total calculation (this could sum all the series)
-                            return ratingSeries.reduce((a, b) => a + b, 0) + statusSeries.reduce((a, b) => a + b, 0);
-                        }
-                    },
-                    
-                }
-            }
-        },
-        labels: [
-            'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5', // Ratings labels
-            'Reject', 'Pending', 'Assigned to QA' // Status labels
-        ],
-        colors: [
-            '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99', // Green shades for ratings
-            '#FF0000', '#FFA500', '#0000FF' // Red, Orange, Blue for statuses
-        ]
-    };
-
-    var chart = new ApexCharts(document.querySelector("#project-chart"), options);
-    chart.render();
-</script>
-<script>
-    var ratings = {!! json_encode($ratings) !!}; // Pass the ratings array from the controller
-    var statuses = {!! json_encode($statuses) !!}; // Pass the statuses array from the controller
-
-    // Prepare series data for the donut chart
-    var ratingSeries = ratings;  // This holds the count of ratings from 1 to 5
-    var statusSeries = [
-        statuses.reject,  // Reject (Red)
-        statuses.pending, // Pending (Orange)
-        statuses.assigned_to_qa  // Assigned to QA (Blue)
-    ];
-
-    var options = {
-        series: [
-            ...ratingSeries,  // Ratings 1-5
-            ...statusSeries   // Reject, Pending, Assigned to QA
-        ],
-        chart: {
-            height: 350,
-            type: 'donut', // Change the chart type to 'donut'
-        },
-        plotOptions: {
-            pie: {
-                donut: {
-                    size: '50%', // Adjust the size of the donut hole
-                    labels: {
-                        show: true,
-                        name: {
-                            fontSize: '22px',
-                        },
-                        value: {
-                            fontSize: '16px',
-                        },
-                        total: {
-                            show: true,
-                            label: 'Total',
-                            formatter: function(w) {
-                                // Custom total calculation (this could sum all the series)
-                                return ratingSeries.reduce((a, b) => a + b, 0) + statusSeries.reduce((a, b) => a + b, 0);
-                            }
+                            return series.reduce((a, b) => a + b, 0);
                         }
                     }
                 }
             }
         },
-        labels: [
-            'Rating 1', 'Rating 2', 'Rating 3', 'Rating 4', 'Rating 5', // Ratings labels
-            'Reject', 'Pending', 'Assigned to QA' // Status labels
-        ],
-        colors: [
-            '#008000', '#00CC00', '#33FF33', '#66FF66', '#99FF99', // Green shades for ratings
-            '#FF0000', '#FFA500', '#0000FF' // Red, Orange, Blue for statuses
-        ]
     };
 
-    var chart = new ApexCharts(document.querySelector("#project-chart2"), options);
-    chart.render();
+    var radialChart = new ApexCharts(document.querySelector("#project-chart"), radialOptions);
+    radialChart.render();
 </script>
 
 

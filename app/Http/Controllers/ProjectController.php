@@ -97,41 +97,91 @@ class ProjectController extends Controller
     // Show project details along with users, statements, and evidences
     public function show(Project $project)
     {
-        $users = User::all();  // To assign project to a user, admin will need to select from all users
+        $users = User::all(); // For admin to assign project to a user
         $project->load('statements.comments', 'statements.evidences');
 
-        // Initialize counters for ratings and statuses
-        $ratings = [0, 0, 0, 0, 0]; // For ratings 1 to 5
-        $statuses = [
-            'reject' => 0,
-            'pending' => 0,
-            'assigned_to_qa' => 0,
-        ];
+        // Initialize data structures for different project types
+        $data = [];
 
-        // If the project type is 'rating', categorize statements by ratings and statuses
-        if ($project->type === 'rating') {
-            foreach ($project->statements as $statement) {
-                // Check if rating exists
-                if ($statement->rating >= 1 && $statement->rating <= 5) {
-                    $ratings[$statement->rating - 1]++; // Increment the count for the respective rating
-                }
+        switch ($project->type) {
+            case 'rating':
+                $data['ratings'] = [0, 0, 0, 0, 0]; // Ratings 1 to 5
+                $data['statuses'] = [
+                    'reject' => 0,
+                    'pending' => 0,
+                    'assigned_to_qa' => 0,
+                ];
 
-                // Check the status and increment the respective counter
-                switch ($statement->status) {
-                    case 'reject':
-                        $statuses['reject']++;
-                        break;
-                    case 'pending':
-                        $statuses['pending']++;
-                        break;
-                    case 'assigned_to_qa':
-                        $statuses['assigned_to_qa']++;
-                        break;
+                foreach ($project->statements as $statement) {
+                    if ($statement->rating >= 1 && $statement->rating <= 5) {
+                        $data['ratings'][$statement->rating - 1]++;
+                    }
+                    switch ($statement->status) {
+                        case 'reject':
+                            $data['statuses']['reject']++;
+                            break;
+                        case 'pending':
+                            $data['statuses']['pending']++;
+                            break;
+                        case 'assigned_to_qa':
+                            $data['statuses']['assigned_to_qa']++;
+                            break;
+                    }
                 }
-            }
+                break;
+
+            case 'accept_reject':
+                $data['statuses'] = [
+                    'approved' => 0,
+                    'rejected' => 0,
+                    'pending' => 0,
+                ];
+
+                foreach ($project->statements as $statement) {
+                    switch ($statement->status) {
+                        case 'approved':
+                            $data['statuses']['approved']++;
+                            break;
+                        case 'pending':
+                            $data['statuses']['pending']++;
+                            break;
+                        case 'rejected':
+                            $data['statuses']['rejected']++;
+                            break;
+                    }
+                }
+                break;
+
+            case 'compliance':
+                $data['statuses'] = [
+                    'compliant' => 0,
+                    'partially_compliant' => 0,
+                    'rejected' => 0,
+                    'pending' => 0,
+                ];
+
+                foreach ($project->statements as $statement) {
+                    switch ($statement->status) {
+                        case 'compliant':
+                            $data['statuses']['compliant']++;
+                            break;
+                        case 'partially_compliant':
+                            $data['statuses']['partially_compliant']++;
+                            break;
+                        case 'pending':
+                            $data['statuses']['pending']++; 
+                            break;    
+                        case 'rejected':
+                            $data['statuses']['rejected']++;
+                            break;
+                    }
+                }
+                break;
         }
-        return view('projects.show', compact('project', 'users', 'ratings', 'statuses'));
+
+        return view('projects.show', compact('project', 'users', 'data'));
     }
+
 
     // Admin assigns project to a user (auditor/client)
     public function assign(Request $request, Project $project)
